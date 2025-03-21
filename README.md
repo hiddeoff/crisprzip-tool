@@ -16,8 +16,9 @@ git clone https://github.com/hiddeoff/crisprzip-tool.git
 conda create -n crisprzip_gui python=3.12
 conda activate crisprzip_gui
 pip install -r requirements.txt
+4. Work on `develop`.
 ```
-4.  Run the GUI
+5.  Run the GUI
 ```bash
 python crisprzip_gui.py
 ```
