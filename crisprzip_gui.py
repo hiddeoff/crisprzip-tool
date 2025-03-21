@@ -1,6 +1,5 @@
 from nicegui import ui
 import crisprzip
-from crisprzip.kinetics import load_landscape
 import plotly.graph_objects as go
 import numpy as np
 import json
@@ -22,8 +21,6 @@ def load_model_params(model_name: str) -> dict:
     base_path = os.path.join(os.path.dirname(crisprzip.__file__), 'landscape_params/')
     with open(os.path.join(base_path, model_map[model_name])) as f:
         return json.load(f)['param_values']
-    
-
 
 ###############################################################################
 # GUI layout with NiceGUI
