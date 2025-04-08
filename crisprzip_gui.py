@@ -28,14 +28,15 @@ from crisprzip.kinetics import *
     
 # Function to get cleavage rate
 def get_cleavage_rate(stc, binding_rate):
+    """Calculate cleavage rate."""
     dt = np.logspace(-2, 6)
     f_clv = stc.get_cleaved_fraction(dt, binding_rate)
     with np.errstate(over='ignore'): # ignore RuntimeWarning: overflow
-        k_eff = curve_fit(
-            f=lambda t, k: 1 - np.exp(-k * t),
+        k_eff = np.exp(curve_fit(
+            f=lambda t, logk: 1 - np.exp(-np.exp(logk) * t),
             xdata=dt,
             ydata=f_clv,
-        )[0][0]
+        )[0][0])
     return k_eff
 
 # Submit button handler for in vitro cleavage
