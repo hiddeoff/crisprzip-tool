@@ -42,6 +42,15 @@ def check_sequence_input(sequence):
                              f"Please specify A, C, G or T.")
 
 
+def process_offtarget_input(inputvalue):
+
+    off_targets = []
+    for seq in inputvalue.split(","):
+        if seq.strip() != "":
+            off_targets.append(seq.strip())
+    return off_targets
+
+
 def make_stc_list(protospacer, off_targets, parameter_set):
     """Generate SearcherTargetComplexes."""
     bare_protein = load_landscape(parameter_set)
@@ -71,7 +80,7 @@ def submit_handler_in_vitro_cleavage():
 
         # Collect user input
         protospacer = target_sequence_input.value
-        off_targets = [seq.strip() for seq in off_targets_input.value.split(',')]
+        off_targets = process_offtarget_input(off_targets_input.value)
         parameter_set = model_dropdown.value
         concentration = float(rnp_concentration_input.value)
 
