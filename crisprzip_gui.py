@@ -25,8 +25,18 @@ from crisprzip.kinetics import *
 #     base_path = os.path.join(os.path.dirname(crisprzip.__file__), 'landscape_params/')
 #     with open(os.path.join(base_path, model_map[model_name])) as f:
 #         return json.load(f)['param_values']
-    
-# Function to get cleavage rate
+
+def make_stc_list(protospacer, off_targets, parameter_set):
+    """Generate SearcherTargetComplexes."""
+    bare_protein = load_landscape(parameter_set)
+    guided_protein = bare_protein.bind_guide_rna(protospacer=protospacer)
+
+    targets = [protospacer] + off_targets
+    protein_sequence_complexes = [guided_protein.probe_sequence(target_seq)
+                                  for target_seq in targets]
+    return protein_sequence_complexes
+
+
 def get_cleavage_rate(stc, binding_rate):
     """Calculate cleavage rate."""
     dt = np.logspace(-2, 6)
@@ -42,20 +52,20 @@ def get_cleavage_rate(stc, binding_rate):
 # Submit button handler for in vitro cleavage
 def submit_handler_in_vitro_cleavage():
     try:
-        parameter_set = model_dropdown.value
-        bare_protein = load_landscape(parameter_set)
-        
+
+        # Collect user input
         protospacer = target_sequence_input.value
         off_targets = [seq.strip() for seq in off_targets_input.value.split(',')]
-        targets = [protospacer] + off_targets
-        
-        guided_protein = bare_protein.bind_guide_rna(protospacer=protospacer)
-        
-        protein_sequence_complexes = []
-        for target_seq in targets:
-            protein_sequence_complexes += [guided_protein.probe_sequence(target_seq)]
-        
+        parameter_set = model_dropdown.value
         concentration = float(rnp_concentration_input.value)
+
+        # Process user input
+        protein_sequence_complexes = make_stc_list(
+            protospacer=protospacer,
+            off_targets=off_targets,
+            parameter_set=parameter_set,
+        )
+
         k_on_ref = 1E-2
         binding_rate = k_on_ref * concentration
 
