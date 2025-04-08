@@ -26,6 +26,22 @@ from crisprzip.kinetics import *
 #     with open(os.path.join(base_path, model_map[model_name])) as f:
 #         return json.load(f)['param_values']
 
+
+def check_sequence_input(sequence):
+    if len(sequence) != 23:
+        raise ValueError(f"Your input of length {len(sequence)} does not "
+                         f"follow the required format 5'-target-PAM-3' "
+                         f"(23 nts total).")
+    if sequence[-2:] != "GG":
+        raise ValueError(f"Currently, the non-canonical PAM '{sequence[-3:]}' "
+                         f"is not supported. Please provide a target with a "
+                         f"canonical 'NGG' PAM.")
+    for nt in sequence:
+        if nt not in ["A", "C", "G", "T"]:
+            raise ValueError(f"Nucleotide '{nt}' could not be recognized. "
+                             f"Please specify A, C, G or T.")
+
+
 def make_stc_list(protospacer, off_targets, parameter_set):
     """Generate SearcherTargetComplexes."""
     bare_protein = load_landscape(parameter_set)
@@ -60,6 +76,9 @@ def submit_handler_in_vitro_cleavage():
         concentration = float(rnp_concentration_input.value)
 
         # Process user input
+        for seq in [protospacer] + off_targets:
+            check_sequence_input(seq)
+
         protein_sequence_complexes = make_stc_list(
             protospacer=protospacer,
             off_targets=off_targets,
@@ -99,7 +118,7 @@ def submit_handler_in_vitro_cleavage():
         #     height=300,
         #     margin=dict(l=50, r=50, t=30, b=50)
         # )
-        #
+
         # Cleaved fraction vs time
         fig1 = go.Figure()
         dt = np.logspace(-1, np.log10(7200))
