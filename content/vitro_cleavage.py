@@ -54,6 +54,22 @@ def show():
             )[0][0])
         return k_eff
 
+    def get_all_cleavage_rates(protospacer, off_targets,
+                               parameter_set, concentration):
+        protein_sequence_complexes = make_stc_list(
+            protospacer=protospacer,
+            off_targets=off_targets,
+            parameter_set=parameter_set,
+        )
+        k_on_ref = 1E-2
+        binding_rate = k_on_ref * concentration
+
+        k_fit_values = [
+            get_cleavage_rate(stc, binding_rate) for
+            stc in protein_sequence_complexes
+        ]
+        return k_fit_values
+
     # Submit button handler for in vitro cleavage
     def submit_handler_in_vitro_cleavage():
         try:
@@ -80,7 +96,15 @@ def show():
             # Clear previous output content - [IMPORTANT], otherwise plots will stack below on each request
             output_container.clear()
 
-            # Cleaved fraction vs time
+            # FIGURE 0
+            k_clv_vals = get_all_cleavage_rates(
+                protospacer, off_targets, parameter_set, concentration
+            )
+            fig0 = go.Figure([go.Bar(x=range(len(off_targets)),
+                                     y=k_clv_vals)])
+
+
+            # FIGURE 1 - Cleaved fraction vs time
             fig1 = go.Figure()
             dt = np.logspace(-1, np.log10(7200))
 
@@ -99,7 +123,8 @@ def show():
                 height=400,
                 margin=dict(l=50, r=50, t=50, b=50)
             )
-            # Cleaved rate vs time
+
+            # FIGURE 2 - Cleaved rate vs time
             fig2 = go.Figure()
             # Concentration range, currently hardcoded and needs a better solution
             conc_min = .1  # nM
@@ -124,9 +149,12 @@ def show():
                 margin=dict(l=50, r=50, t=50, b=50)
             )
             with output_container:
-                with ui.row().classes('w-full no-wrap'):
-                    ui.plotly(fig1).classes('w-1/2')
-                    ui.plotly(fig2).classes('w-1/2')
+                with ui.column(align_items='center').classes('w-full'):
+                    ui.plotly(fig0)
+                    with ui.row().classes('w-full no-wrap'):
+                        ui.plotly(fig1).classes('w-1/2')
+                        ui.plotly(fig2).classes('w-1/2')
+
         except Exception as e:
             ui.notify(f'Error: {str(e)}', type='negative')
 
