@@ -10,13 +10,16 @@ def show():
         pattern = r'^[ACGTacgt\,\n\s]*$'
         if not (re.fullmatch(pattern, input)):
             return "Only ACGT nucleotides"
-        if length is not None:
+        if length is not None and len(input.strip()) > 0:
             input_length = len(input.strip())
             if input_length < length:
                 return f"Too short ({input_length}/{length})"
             elif input_length > length:
                 return f"Too long ({input_length}/{length})"
 
+    def concentration_validation(input) -> str:
+        if not (re.fullmatch("^\d*(\.\d*)?([eE][+-]?\d+)?$", input)):
+            return f"Only numeric input"
 
     with ui.card().classes('p-4'):
         with ui.grid(columns=2).style('grid-template-columns: 300px 100px').classes('gap-0'):
@@ -65,9 +68,10 @@ def show():
 
             # CONCENTRATION
             with ui.element().classes('w-full h-full p-0' + bc):
-                with ui.row(align_items='center').classes('w-[280px] gap-0'):
-                    ui.markdown('**RNP concentration**').classes('w-1/2')
-                    concentration_input = (ui.input(placeholder='100')
+                with ui.row(align_items='start').classes('w-[280px] gap-0'):
+                    ui.markdown('**RNP concentration**').classes('w-1/2 leading-[1.7]')
+                    concentration_input = (ui.input(placeholder='100',
+                                                    validation=concentration_validation)
                                            .props('dense suffix="nM"')
                                            .classes('w-1/2'))
                 ui.element().classes("h-4")
@@ -75,7 +79,7 @@ def show():
             ui.element()
 
             # PARAMETER SELECTION
-            with ui.row(align_items='center').classes('w-full gap-0 p-0' + bc):
+            with ui.row(align_items='center').classes('w-full p-0' + bc):
                 ui.markdown('**Model parameters**').classes('leading-[0.7]')
                 (ui.icon('info')
                 .tooltip('Select the model for cleavage predictions.')
