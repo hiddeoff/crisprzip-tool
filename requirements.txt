@@ -1,4 +1,4 @@
-crisprzip==1.1.0
+crisprzip>=1.1.1
 matplotlib
 nicegui
 numpy
