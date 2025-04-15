@@ -18,8 +18,8 @@ def show():
                 return f"Too long ({input_length}/{length})"
 
     def concentration_validation(input) -> str:
-        if not (re.fullmatch("^\d*(\.\d*)?([eE][+-]?\d+)?$", input)):
-            return f"Only numeric input"
+        if not re.fullmatch(r"^\d*(\.\d*)?([eE][+-]?\d+)?$", input):
+            return "Only numeric input"
 
     with ui.card().classes('p-4'):
         with ui.grid(columns=2).style('grid-template-columns: 300px 100px').classes('gap-0'):
