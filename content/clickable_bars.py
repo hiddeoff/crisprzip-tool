@@ -17,80 +17,63 @@ colors = ['blue'] * len(values)
 
 selected_indices = set()
 
+@ui.page('/')
+def page():
 
-# --- Plotly ---
-def create_figure():
-    fig = go.Figure()
-    fig.add_trace(go.Bar(
-        x=indices,
-        y=values,
-        marker=dict(color=colors)
-    ))
-    fig.update_layout(
-        clickmode='event+select',
-        title='Click bars or table rows to select/deselect',
-        dragmode=False,
-        yaxis={'type': 'log'}
-    )
-    return fig
+    # --- Plotly ---
+    def create_figure():
+        fig = go.Figure()
+        fig.add_trace(go.Bar(
+            x=indices,
+            y=values,
+            marker=dict(color=colors)
+        ))
+        fig.update_layout(
+            clickmode='event+select',
+            dragmode=False,
+            yaxis={'type': 'log'}
+        )
+        return fig
 
-def update_plot():
-    plot.figure = create_figure()
+    def update_plot():
+        plot.figure = create_figure()
 
-# --- AG Grid ---
-def get_ag_rows():
-    # Style rows dynamically based on selection
-    return [{
-        'index': i,
-        'sequence': targets[i],
-        'k_clv': values[i],
-        # '_style': 'background-color: #ffedcc;' if i in selected_indices else ''
-    } for i in range(len(targets))]
+    # --- Layout ---
+    with ui.row(align_items='center').classes('w-full gap-0'):
 
-def update_grid():
-    grid.options['rowData'] = get_ag_rows()
-    grid.update()
+        with ui.column(align_items='center').classes('w-1/2'):
+            grid = ui.aggrid({
+                'columnDefs': [
+                    {'headerName': '', 'field': 'select', 'width': '25',
+                     'checkboxSelection': True, 'headerCheckboxSelection': True},
+                    {'headerName': '#', 'field': 'index', 'width': '30'},
+                    {'headerName': 'sequence', 'field': 'sequence', 'width': '150'},
+                    {'headerName': 'k_clv', 'field': 'k_clv'},
+                ],
+                'rowData': [
+                    {'select': False, 'index': i, 'sequence': targets[i], 'k_clv': values[i]}
+                    for i in range(len(targets))
+                ],
+                'rowSelection': 'multiple',
+            })
 
-def toggle_selection(index):
-    if index in selected_indices:
-        selected_indices.remove(index)
-        colors[index] = 'blue'
-    else:
-        selected_indices.add(index)
-        colors[index] = 'orange'
-    update_plot()
-    update_grid()
+            # Working event trigger
+            grid.on('selectionChanged', lambda event: ui.notify("Selection changed!"))  # works
 
-# --- Layout ---
-with ui.row(align_items='center').classes('w-full gap-0'):
+            async def output_selected_rows():
+                ui.notify('You pressed the button!')
+                rows = await grid.get_selected_rows()
+                ui.notify('Received selected rows')
+                if not rows:
+                    ui.notify("No row(s) selected!")
+                else:
+                    ui.notify(
+                        f"You selected rows {', '.join([str(r['index']) for r in rows])}")
 
-    grid = ui.aggrid({
-        'columnDefs': [
-            {'headerName': '#', 'field': 'index'},
-            {'headerName': 'sequence', 'field': 'sequence'},
-            {'headerName': 'k_clv', 'field': 'k_clv'},
-        ],
-        'rowData': get_ag_rows(),
-        'rowSelection': 'multiple',
-        # 'getRowId': {'function': 'params.data.index.toString()'},
-        # 'suppressRowClickSelection': True,
-    }).classes('w-1/2').style("grid-template-columns: auto auto auto")
+            ui.button('Select #2', on_click=lambda: grid.run_row_method(2, 'setSelected', True))  # Select 3rd row
 
-    grid.options['autoSizeStrategy'] = {'type': 'fitCellContents'}
+            ui.button('Output selected rows', on_click=output_selected_rows)
 
-    plot = ui.plotly(create_figure()).classes('w-1/2')
+        plot = ui.plotly(create_figure()).classes('w-1/2')
 
-    update_grid()
-
-# --- Interactions ---
-plot.on('plotly_click', lambda e: toggle_selection(e.args['points'][0]['pointIndex']))
-grid.on('rowClicked', lambda e: toggle_selection(int(e.args['data']['index'])))
-
-# --- Sum Button ---
-with ui.column(align_items='center').classes('w-full gap-0'):
-    ui.button('Sum Selected').on('click', lambda: ui.notify(
-        f"Selected total: {sum(values[i] for i in selected_indices)}"
-    ))
-
-# --- Run ---
 ui.run()
