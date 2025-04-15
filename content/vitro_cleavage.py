@@ -1,15 +1,26 @@
-from nicegui import ui
-from crisprzip import *
-import plotly.graph_objects as go
-import numpy as np
-import json
 import os
+import json
+import re
+
+from nicegui import ui
+import numpy as np
+import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from scipy.optimize import curve_fit
+
+from crisprzip import *
 from crisprzip.kinetics import *
 
 
 def show():
+
+    def update_placeholder(value):
+        if value == 'protospacer':
+            target_sequence_input.placeholder = 'GACGCATAAAGATGAGACGCTGG'
+        elif value == 'guide RNA':
+            target_sequence_input.placeholder = 'GACGCAUAAAGAUGAGACGC'
+        target_sequence_input.update()  # Refresh the input to apply changes
+
     def check_sequence_input(sequence):
         if len(sequence) != 23:
             raise ValueError(f"Your input of length {len(sequence)} does not "
@@ -130,131 +141,129 @@ def show():
         except Exception as e:
             ui.notify(f'Error: {str(e)}', type='negative')
 
+    def sequence_validation(input, length=None) -> str:
+        pattern = r'^[ACGTacgt\,\n\s]*$'
+        if not (re.fullmatch(pattern, input)):
+            return "Only ACGT nucleotides"
+        if length is not None and len(input.strip()) > 0:
+            input_length = len(input.strip())
+            if input_length < length:
+                return f"Too short ({input_length}/{length})"
+            elif input_length > length:
+                return f"Too long ({input_length}/{length})"
+
+    def concentration_validation(input) -> str:
+        if not (re.fullmatch("^\d*(\.\d*)?([eE][+-]?\d+)?$", input)):
+            return f"Only numeric input"
+
     ui.markdown(
-        'Predictions of cleavage by active Cas9 in a typical in vitro setting, where RNP is abundant enough to cleave targets independently.').style(
-        'font-size: 16px')
+        'Predictions of cleavage by active Cas9 in a typical in vitro setting, '
+        'where RNP is abundant enough to cleave targets independently.'
+    ).style('font-size: 16px')
+
     with ui.row().classes('w-full h-full no-wrap'):
-        with ui.column().classes('w-2/5 h-full'):
-            ui.markdown('<u>**Inputs**</u>').style(
-                'font-size: 20px; color: gray;')
-            # Target seq and off-target seq rows
-            with ui.row().classes('w-full h-full no-wrap'):
-                ui.markdown('**Target sequence:**').style('font-size: 16px')
-                # Input field for target sequence
-                target_sequence_input = ui.input(
-                    placeholder='Enter target sequence (e.g., GACGCATAAAGATGAGACGCTGG)').classes(
-                    'w-full')
 
-                # Radio buttons to select between "protospacer" and "guide RNA"
-                def update_placeholder(value):
-                    if value == 'protospacer':
-                        target_sequence_input.placeholder = 'Enter DNA sequence (e.g., GACGCATAAAGATGAGACGCTGG)'
-                    elif value == 'guide RNA':
-                        target_sequence_input.placeholder = 'Enter RNA sequence (e.g., GACGCATAAAGAUCUCGCUGG)'
-                    target_sequence_input.update()  # Refresh the input to apply changes
+        # USER INPUT
+        with ui.card().classes('p-4 m-4'):
+            with ui.grid(columns=2).style(
+                    'grid-template-columns: 300px 100px').classes('gap-0'):
+                # TARGET SEQUENCE
+                with ui.row(align_items='center').classes('p-0'):
+                    ui.markdown('**Target sequence**').classes('p-0 leading-[0.7]')
+                    ui.icon('info').tooltip(
+                        'Select the model for cleavage predictions. Recommended: sequence-params2.').style(
+                        'font-size: 20px')
+                ui.element()
 
-                ui.radio(['protospacer', 'guide RNA'], value='protospacer',
-                         on_change=update_placeholder)
-                # Information balloon for target sequence
-                ui.icon('info').tooltip(
-                    'Provide the DNA sequence as: 5’-20 nt sequence + PAM-3’, e.g., AGACGCATAAAGATGAGACGCTGG').style(
-                    'font-size: 20px')
+                with ui.column().classes('w-full p-0'):
+                    target_sequence_input = ui.input(
+                        validation=lambda x: sequence_validation(x, 23),
+                        # once the update_placeholder() function works, this arg should be omitted
+                        placeholder='GACGCATAAAGATGAGACGCTGG'
+                    ).classes('w-[280px] font-mono').props('dense')
+                    ui.element().classes("h-1")
 
-            # Insert spacer
-            ui.markdown('---')
+                with ui.column().classes('w-full p-0'):
+                    target_input_select = (
+                        ui.select(['protospacer', 'guide RNA'],
+                                  value='protospacer',
+                                  on_change=update_placeholder)
+                        .classes('w-[100px]').props('dense')
+                    )
+                    update_placeholder(target_input_select.value)
 
-            # # Off-target sequences textarea and upload button
-            # with ui.row().classes('w-full h-full no-wrap'):
-            #     ui.markdown('**Off-target sequences:**').style('font-size: 16px')
-            #     off_target_textarea = ui.textarea(placeholder='Off-target sequence(-es)').props('rows=3').classes('w-1/2')
-            #     upload_button = ui.button('Upload').props('icon=upload').classes('w-1/3')
-            #     # Information balloon for off-target sequence
-            #     ui.icon('info').tooltip('Upload off-target sequences from a local text file.').style('font-size: 20px')
+                # OFF-TARGET SEQUENCES
+                with ui.row(align_items='center').classes('p-0'):
+                    ui.markdown('**Off-target sequences**').classes(
+                        'p-0 leading-[0.7]')
+                    ui.icon('info').tooltip(
+                        'Select the model for cleavage predictions. Recommended: sequence-params2.').style(
+                        'font-size: 20px')
+                ui.element()
 
-            # Off-target sequences input
-            with ui.row().classes('w-full h-full no-wrap'):
-                ui.markdown('**Off-target sequences:**').style(
-                    'font-size: 16px')
-                off_targets_input = ui.textarea(
-                    placeholder='Enter up to 5 off-target sequences, comma-separated').props(
-                    'rows=3').classes('w-1/2')
+                with ui.column().classes('w-full h-full p-0'):
+                    off_targets_input = ui.textarea(
+                        placeholder='GACGCATAAAGATGAGACGCTGG,\nGACGCATAAAGATGAGACGCTGG,\n...',
+                        validation=lambda x: sequence_validation(x, None)
+                    ).props('rows=5 dense').classes('w-[280px] h-2fr font-mono')
+                    ui.element().classes("h-1")
 
-                # Function to validate and split input
-                def validate_off_targets(text):
-                    sequences = [seq.strip() for seq in text.split(',')]
-                    if len(sequences) > 5:
-                        ui.notify(
-                            'Error: Limit exceeded. Only 5 sequences currently allowed.',
-                            type='negative')
-                        return ','.join(
-                            sequences[:5])  # Return only the first 5 sequences
-                    return text
+                with ui.row(align_items='start').classes('w-full h-full p-0'):
+                    with ui.row(align_items='center').classes('w-full h-[52px]'):
+                        ui.button('upload').props('outline no-caps')
 
-                # Attach the validation function to the input
-                off_targets_input.on('update:model-value',
-                                     lambda e: off_targets_input.set_value(
-                                         validate_off_targets(
-                                             off_targets_input.value)))
+                # CONCENTRATION
+                with ui.element().classes('w-full h-full p-0'):
+                    with ui.row(align_items='start').classes('w-[280px] gap-0'):
+                        ui.markdown('**RNP concentration**').classes(
+                            'w-1/2 leading-[1.7]')
+                        rnp_concentration_input = (ui.input(placeholder='100',
+                                                            validation=concentration_validation)
+                                                   .props('dense suffix="nM"')
+                                                   .classes('w-1/2'))
+                    ui.element().classes("h-4")
 
-                # Upload button for file-based input (currently disabled), placeholder bnelow
-                # upload_button = ui.button('Upload').props('icon=upload').classes('w-1/3')
-                ui.icon('info').tooltip(
-                    'Specify off-target sequences. You can check to up to 5 off-target sequences, comma-separated.').style(
-                    'font-size: 20px')
+                ui.element()
 
-            # Insert spacer
-            ui.markdown('---')
+                # PARAMETER SELECTION
+                with ui.row(align_items='center').classes('w-full p-0'):
+                    ui.markdown('**Model parameters**').classes('leading-[0.7]')
+                    (ui.icon('info')
+                     .tooltip('Select the model for cleavage predictions.')
+                     .style('font-size: 20px'))
+                ui.element()
 
-            # Model dropdown with information balloon. Then next to it, RNP conc.
-            with ui.row().classes('w-full h-full no-wrap'):
-                # Model label
-                ui.markdown('**Model:**').style('font-size: 16px')
+                with ui.column().classes('w-full h-full p-0'):
+                    model_dropdown = ui.select(
+                        options={
+                            'sequence_params': 'sequence-params2 (recommended)',
+                            'average_params': 'average-params',
+                            'average_params_legacy': 'average-params-legacy'
+                        },
+                        value='sequence_params'
+                    ).props('dense').classes('w-[280px] p-0 m-0')
 
-                # Simple dropdown with model names
-                model_dropdown = ui.select(
-                    options={
-                        'sequence_params': 'sequence-params2 (recommended)',
-                        'average_params': 'average-params',
-                        'average_params_legacy': 'average-params-legacy'
-                    },
-                    value='sequence_params'
-                ).classes('w-1/4')
+                with ui.row(align_items='center').classes('h-full w-full p-0'):
+                    (ui.button(icon='search')
+                     .classes('h-4 w-4').style('font-size: 12px').props('outline'))
 
-                # Not needed
-                # # 3. Function to load parameters silently
-                # def update_params():
-                #     global loaded_params
-                #     try:
-                #         selected_value = model_dropdown.value
-                #         loaded_params = load_model_params(selected_value)
-                #         # Optional small notification
-                #         ui.notify('Parameters loaded', type='positive', duration=1)
-                #     except Exception as exc:
-                #         ui.notify(f'Error: {str(exc)}', type='negative')
+                ui.element().classes("h-6")
+                ui.element()
 
-                # # 4. Connect the event handler
-                # model_dropdown.on('update:model-value', lambda _: update_params())
-                # Next row has an info icon
-                ui.icon('info').tooltip(
-                    'Select the model for cleavage predictions. Recommended: sequence-params2.').style(
-                    'font-size: 20px')
-                # Insert spacer
-                ui.markdown('<br>')
-                # RNP concentration input
-                ui.markdown('**RNP concentration (nM):**').style(
-                    'font-size: 16px')
-                rnp_concentration_input = ui.input(value='100').props(
-                    'type=number').classes('ml-2 w-20')
+                submit_button = (
+                    ui.button('Submit', on_click=submit_handler_in_vitro_cleavage)
+                    .props('icon=send').classes('w-[280px]')
+                )
 
-            # Submit button with event handler
-            submit_button = ui.button('Submit',
-                                      on_click=submit_handler_in_vitro_cleavage).props(
-                'icon=send')
-
-        # Vertical separator between inputs and outputs
-        ui.separator().props('vertical')
-
-        with ui.column().classes('w-3/5 h-full no-wrap'):
+        # OUTPUT
+        with ui.column().classes('w-full h-full no-wrap'):
             ui.markdown('<u>**Output**</u>').style(
                 'font-size: 20px; color: gray;')
-            output_container = ui.element('div').classes('w-full no-wrap')
+            output_container = ui.element('div').classes('flex-grow no-wrap')
+
+
+@ui.page("/")
+def index():
+    show()
+
+ui.run()
