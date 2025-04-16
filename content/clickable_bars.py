@@ -41,6 +41,7 @@ def page():
     # --- Layout ---
     with ui.row(align_items='center').classes('w-full gap-0'):
 
+        # AG Grid
         with ui.column(align_items='center').classes('w-1/2'):
             grid = ui.aggrid({
                 'columnDefs': [
@@ -74,6 +75,27 @@ def page():
 
             ui.button('Output selected rows', on_click=output_selected_rows)
 
-        plot = ui.plotly(create_figure()).classes('w-1/2')
+
+        # Plot
+        with ui.column(align_items='center').classes('w-1/2'):
+
+            fig = create_figure()
+            plot = ui.plotly(fig)
+            # doesn't work
+            # plot._props['options']['config'] = {
+            #     'modeBarButtonsToRemove': ['zoom', 'pan']
+            # }
+
+            # plot.on('plotly_selecting', lambda: ui.notify('Plotly event: "Selecting"'))
+            plot.on('plotly_selected', lambda: ui.notify('Plotly event: "Selected"'))
+            plot.on('plotly_deselected', lambda: ui.notify('Plotly event: "Deselected"'))
+
+            def output_selected_bars():
+                # ui.notify('You pressed the button!')
+                ui.notify(fig.data)
+
+            ui.button("Get selection", on_click=output_selected_bars)
+
+
 
 ui.run()
