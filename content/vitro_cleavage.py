@@ -59,10 +59,14 @@ def show_input():
             elif input_length > length:
                 return f"Too long ({input_length}/{length})"
 
-    def concentration_validation(input) -> str:
-        if not (re.fullmatch(r"^\d*(\.\d*)?([eE][+-]?\d+)?$", input)):
-            return f"Only numeric input"
-
+    def concentration_validation(input) -> str| None:
+        concentration = str(input)
+        if not concentration.strip():
+            return "RNP concentration cannot be empty."
+        if not re.fullmatch(r"^\d*(\.\d*)?([eE][+-]?\d+)?$", concentration):
+            return "Please enter a valid number."
+        return None  # Return None if the input is valid
+	
     # CONTENT
     with ui.grid(columns=2).style(
             'grid-template-columns: 300px 100px').classes('gap-0'):
@@ -154,10 +158,22 @@ def show_input():
                          .classes('w-[280px]'))
 
     def get_input_values():
-        ontarget = process_ontarget_input(
+        
+		ontarget = process_ontarget_input(
             target_sequence_input.value,
             target_input_select.value
         )
+
+		# Validate concentration input
+		concentration = rnp_concentration_input.value
+		concentration_error = concentration_validation(concentration)
+		if concentration_error:
+			message = "RNP concentration cannot be empty and has to be a valid number. Default value is 100."
+			ui.notify(f'Error: {message}', type='negative')
+			return  # Stop further processing if there's an error
+		else:
+			concentration = float(concentration)
+		
         input_vals = {
             'on_target': ontarget,
             'off_targets': process_offtarget_input(off_targets_input.value),
@@ -193,7 +209,7 @@ def show_output(output_container, get_input_values: callable):
                 ydata=f_clv,
             )[0][0])
         return k_eff
-
+      
     def get_all_cleavage_rates(protospacer, off_targets,
                                parameter_set, concentration):
         protein_sequence_complexes = make_stc_list(
