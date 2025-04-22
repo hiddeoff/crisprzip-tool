@@ -73,7 +73,16 @@ def show():
             protospacer = target_sequence_input.value
             off_targets = process_offtarget_input(off_targets_input.value)
             parameter_set = model_dropdown.value
-            concentration = float(rnp_concentration_input.value)
+            concentration = rnp_concentration_input.value
+
+            # Validate concentration input
+            concentration_error = concentration_validation(concentration)
+            if concentration_error:
+                message = "RNP concentration cannot be empty and has to be a valid number. Default value is 100."
+                ui.notify(f'Error: {message}', type='negative')
+                return  # Stop further processing if there's an error
+            else:
+                concentration = float(concentration)
 
             # Process user input
             for seq in [protospacer] + off_targets:
@@ -152,9 +161,13 @@ def show():
             elif input_length > length:
                 return f"Too long ({input_length}/{length})"
 
-    def concentration_validation(input) -> str:
-        if not (re.fullmatch("^\d*(\.\d*)?([eE][+-]?\d+)?$", input)):
-            return f"Only numeric input"
+    def concentration_validation(input) -> str| None:
+        concentration = str(input)
+        if not concentration.strip():
+            return "RNP concentration cannot be empty."
+        if not re.fullmatch(r"^\d*(\.\d*)?([eE][+-]?\d+)?$", concentration):
+            return "Please enter a valid number."
+        return None  # Return None if the input is valid
 
     ui.markdown(
         'Predictions of cleavage by active Cas9 in a typical in vitro setting, '
