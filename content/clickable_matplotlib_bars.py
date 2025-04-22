@@ -180,7 +180,7 @@ def page():
                     ax0.vlines([0, 5, 10, 15, 20], -50, 50,
                                color='white', zorder=0, lw=.8)
                     ax0.set_ylim(*lims0)
-                    ax0.set_ylabel("free energy $\Delta U_b$ ($k_BT$)")
+                    ax0.set_ylabel(r"free energy $\Delta U_b$ ($k_BT$)")
                     ax0.set_facecolor('#ECF0F1')
 
                     # FIGURE 1 - Cleaved fraction vs time

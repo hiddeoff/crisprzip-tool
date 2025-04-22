@@ -33,7 +33,7 @@ def index():
 
             with ui.tab_panels(in_vitro_tabs, value=vitro_cleavage).classes('w-full'):
                 with ui.tab_panel(vitro_cleavage).classes('w-full h-full no-wrap'):
-                    content.vitro_cleavage.show()  # content/vitro_cleavage.py
+                    content.vitro_cleavage.show_contents()  # content/vitro_cleavage.py
                 with ui.tab_panel(vitro_binding):
                     ui.label('IN VITRO - BINDING (dCas9) GOES HERE')
 
