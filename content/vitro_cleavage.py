@@ -159,20 +159,20 @@ def show_input():
 
     def get_input_values():
         
-		ontarget = process_ontarget_input(
+        ontarget = process_ontarget_input(
             target_sequence_input.value,
             target_input_select.value
         )
 
 		# Validate concentration input
-		concentration = rnp_concentration_input.value
-		concentration_error = concentration_validation(concentration)
-		if concentration_error:
-			message = "RNP concentration cannot be empty and has to be a valid number. Default value is 100."
-			ui.notify(f'Error: {message}', type='negative')
-			return  # Stop further processing if there's an error
-		else:
-			concentration = float(concentration)
+        concentration = rnp_concentration_input.value
+        concentration_error = concentration_validation(concentration)
+        if concentration_error:
+            message = "RNP concentration cannot be empty and has to be a valid number. Default value is 100."
+            ui.notify(f'Error: {message}', type='negative')
+            return  # Stop further processing if there's an error
+        else:
+            concentration = float(concentration)
 		
         input_vals = {
             'on_target': ontarget,
