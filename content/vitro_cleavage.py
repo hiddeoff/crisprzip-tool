@@ -1,9 +1,11 @@
 import re
 
-from nicegui import ui
+from nicegui import ui, events
 from scipy.optimize import curve_fit
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from io import StringIO
+import pandas as pd
 
 from crisprzip import *
 from crisprzip.kinetics import *
@@ -32,6 +34,27 @@ def show_input():
             if nt not in ["A", "C", "G", "T"]:
                 raise ValueError(f"Nucleotide '{nt}' could not be recognized. "
                                  f"Please specify A, C, G or T.")
+
+    def handle_offtarget_uploads(e: events.UploadEventArguments):
+        try:
+            off_targets_input.value = "" # clear the input field
+            # read the file content
+            content = e.content.read().decode("utf-8")
+            
+            # parse the csv (one column comma separated)
+            if e.name.lower().endswith('.csv'):
+                with StringIO(content) as f:
+                    df = pd.read_csv(f)
+                    sequences = df.iloc[:, 0].tolist()
+                    formatted_sequences = ',\n'.join(sequences)
+                    off_targets_input.value= formatted_sequences
+            else:
+                # otherwise juts use the content then from the off-target box
+                off_targets_input.value = content
+                
+            ui.notify('File uploaded successfully', type='positive')
+        except Exception as e:
+            ui.notify(f'Error processing file: {str(e)}', type='negative')
 
     def process_ontarget_input(inputvalue, inputtype):
         if inputtype == "protospacer":
@@ -113,9 +136,18 @@ def show_input():
             ui.element().classes("h-1")
 
         with ui.row(align_items='start').classes('w-full h-full p-0'):
-            with ui.row(align_items='center').classes('w-full h-[52px]'):
-                ui.button('upload').props('outline no-caps')
-
+            with ui.row(align_items='center').classes('w-[52px] h-[52px]'):
+                upload_component = ui.upload(
+                    on_upload=handle_offtarget_uploads,
+                    on_rejected=lambda e: ui.notify('File upload failed', type='warning'),
+                    auto_upload=True
+                ).props("accept=.csv hide-upload-btn").classes('hidden') # can add .txt (for example) to .props if you want to uplaod something other than .csv files
+                # add custom ui button (instead of the regular upload button)
+                ui.button('Upload', on_click=lambda: (
+                    upload_component.reset(),
+                    upload_component.run_method('pickFiles')
+                )).props('outline no-caps')
+                
         # CONCENTRATION
         with ui.element().classes('w-full h-full p-0'):
             with ui.row(align_items='start').classes('w-[280px] gap-0'):
