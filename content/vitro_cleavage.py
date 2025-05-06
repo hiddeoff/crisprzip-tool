@@ -247,28 +247,55 @@ def show_output(output_container, get_input_values: callable):
     output_container.clear()
     with output_container:
         with ui.column(align_items='center').classes('w-full'):
-            plot_row = ui.row(align_items='center').classes('gap-0 border')
-        show_button = ui.button("Show selected targets")
+            plot_row = ui.row(align_items='center').classes('gap-0')
         selection_container = ui.element('div').classes('w-full')  # determine width!
+        showing_selection = False
+
 
     with plot_row:
 
         # Table
-        with ui.column(align_items='center').classes('w-[375px] h-[250px]'):
+        with ui.column(align_items='center').classes('w-[375px]'):
+
+            def to_sci_html(val):
+                scistr = f"{val:.2e}"
+                val = scistr[:4]
+                pow = str(int(scistr[5:]))
+                sci_html = f"{val} &middot 10<sup>{pow}</sup>"
+                return sci_html
+
+            ui.add_head_html('''
+            <style>
+                .ag-cell.monospace-column {
+                    font-family: monospace !important;
+                    font-size: 13px;
+                }
+            </style>
+            ''')
+            default_coldefs = {'suppressMovable': True, 'sortable': False, 'resizable': False}
+
             grid = ui.aggrid({
-                'columnDefs': [
-                    {'headerName': '', 'field': 'select', 'width': '25',
-                     'checkboxSelection': True, 'headerCheckboxSelection': True},
-                    {'headerName': '#', 'field': 'index', 'width': '30'},
-                    {'headerName': 'sequence', 'field': 'sequence', 'width': '150'},
-                    {'headerName': 'k_clv', 'field': 'k_clv'},
-                ],
+                'columnDefs': [dict(cd, **default_coldefs) for cd in [
+                    {'headerName': '', 'field': 'select', 'width': '40', 'checkboxSelection': True, 'headerCheckboxSelection': True},
+                    {'headerName': '#', 'field': 'index', 'width': '40'},
+                    {'headerName': 'sequence', 'field': 'sequence', 'width': '200', 'cellClass': 'monospace-column'},
+                    {'headerName': 'k_clv (s⁻¹)', 'field': 'k_clv', 'width': '90'}
+                ]],
                 'rowData': [
-                    {'index': i, 'sequence': targets[i], 'k_clv': values[i]}
+                    {'index': i, 'sequence': targets[i], 'k_clv': to_sci_html(values[i])}
                     for i in range(len(targets))
                 ],
-                'rowSelection': 'multiple',
-            })
+                'rowSelection': 'multiple'
+            }, html_columns=[3], auto_size_columns=True)
+
+            with ui.row(align_items='center').classes('w-full'):
+                show_button = ui.button("SHOW").classes('w-[100px]')
+
+                ui.icon('info').tooltip('Tip')
+                ui.space()
+                sort_button = ui.button().props('no-caps outline')
+                with sort_button:
+                    ui.html("sort by <i>k<sub>clv</sub></i>")
 
         async def get_selected_ids():
             selection = await grid.get_selected_rows()
@@ -287,6 +314,14 @@ def show_output(output_container, get_input_values: callable):
             ax.grid(axis='x')
             fig.tight_layout()
 
+            async def grid_selection_handler():
+                selected_ids = await get_selected_ids()
+                if not selected_ids and showing_selection:
+                    show_button.set_text("clear")
+                else:
+                    show_button.set_text("show")
+                await highlight_selected_bars()
+
             async def highlight_selected_bars():
                 selected_ids = await get_selected_ids()
 
@@ -299,10 +334,27 @@ def show_output(output_container, get_input_values: callable):
                             bar.set_alpha(.6)
                 ui.update(fig)
 
-            grid.on('selectionChanged', highlight_selected_bars)
+            grid.on('selectionChanged', grid_selection_handler)
+
+    async def handle_show_click():
+        nonlocal showing_selection
+
+        selected_ids = await get_selected_ids()
+        if selected_ids:
+            await plot_selection()
+
+        elif not showing_selection:
+            ui.notify("No targets selected to show.", type='warning')
+
+        else:
+            selection_container.clear()
+            showing_selection = False
+            show_button.set_text("show")
 
     async def plot_selection():
+        nonlocal showing_selection
         selected_ids = await get_selected_ids()
+        showing_selection = True
 
         try:
             k_on_ref = 1E-2
@@ -313,7 +365,7 @@ def show_output(output_container, get_input_values: callable):
 
             with selection_container:
                 dpi = plt.rcParams['figure.dpi']  # pixel in inches
-                with ui.matplotlib(figsize=(1200/dpi, 250/dpi), facecolor='red').classes().figure as fig1:
+                with ui.matplotlib(figsize=(1200/dpi, 250/dpi)).classes().figure as fig1:
                     spec1 = fig.add_gridspec(
                         ncols=3, nrows=1, right=.8, wspace=.5, bottom=0.2
                     )
@@ -414,7 +466,7 @@ def show_output(output_container, get_input_values: callable):
         except Exception as e:
             ui.notify(f'Error: {str(e)}', type='negative')
 
-    show_button.on_click(plot_selection)
+    show_button.on_click(handle_show_click)
 
 
 def show_contents():
@@ -425,7 +477,7 @@ def show_contents():
             submit_button, get_input_values = show_input()
 
         # OUTPUT
-        output_container = ui.column().classes('w-full h-full no-wrap border m-2')
+        output_container = ui.column().classes('w-full h-full no-wrap m-2')
         submit_button.on_click(
             lambda: show_output(output_container, get_input_values)
         )
