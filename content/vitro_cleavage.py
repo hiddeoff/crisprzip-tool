@@ -9,6 +9,9 @@ from crisprzip import *
 from crisprzip.kinetics import *
 
 
+initial_input = True
+
+
 def show_input():
 
     def update_placeholder(value):
@@ -63,85 +66,90 @@ def show_input():
         if not (re.fullmatch(r"^\d*(\.\d*)?([eE][+-]?\d+)?$", input)):
             return f"Only numeric input"
 
+    wc1 = 230  # column 1 width
+    wc2 = 100   # column 2 width
+    fsz = 10   # font size (in pt)
+
     # CONTENT
-    with ui.grid(columns=2).style(
-            'grid-template-columns: 300px 100px').classes('gap-0'):
+    with ui.grid(columns=2).style(f'grid-template-columns: {wc1}px {wc2}px').classes('gap-0'):
 
         # TARGET SEQUENCE
         with ui.row(align_items='center').classes('p-0'):
-            ui.markdown('**Target sequence**').classes('p-0 leading-[0.7]')
-            ui.icon('info').tooltip(
-                'Select the model for cleavage predictions. Recommended: sequence-params2.').style(
-                'font-size: 20px')
+            ui.markdown('**Target sequence**').classes('p-0 leading-[0.7]').style(f'font-size: {fsz}pt')
+            ui.icon('info').tooltip('Select the model for cleavage predictions. Recommended: sequence-params2.').style(f'font-size: {fsz}pt')
         ui.element()
 
         with ui.column().classes('w-full p-0'):
             target_sequence_input = ui.input(
                 validation=lambda x: sequence_validation(x, 23),
                 # once the update_placeholder() function works, this arg should be omitted
-                placeholder='GACGCATAAAGATGAGACGCTGG'
-            ).classes('w-[280px] font-mono').props('dense')
-            ui.element().classes("h-1")
+                placeholder='GACGCATAAAGATGAGACGCTGG',
+                value=('GACGCATAAAGATGAGACGCTGG' if initial_input else None),
+            ).classes(f'w-[{wc1 - 20}px] font-mono').props('dense').style(f'font-size: {fsz}pt')
 
         with ui.column().classes('w-full p-0'):
             target_input_select = (
                 ui.select(['protospacer', 'guide RNA'],
                           value='protospacer',
                           on_change=update_placeholder)
-                .classes('w-[100px]').props('dense')
+                .classes('w-full').props('dense').style(f'font-size: {fsz}pt')
             )
             update_placeholder(target_input_select.value)
 
         # OFF-TARGET SEQUENCES
         with ui.row(align_items='center').classes('p-0'):
-            ui.markdown('**Off-target sequences**').classes(
-                'p-0 leading-[0.7]')
-            ui.icon('info').tooltip(
-                'Select the model for cleavage predictions. Recommended: sequence-params2.').style(
-                'font-size: 20px')
+            ui.markdown('**Off-target sequences**').classes('p-0 leading-[0.7]').style(f'font-size: {fsz}pt')
+            ui.icon('info').tooltip('Select the model for cleavage predictions. Recommended: sequence-params2.').style(f'font-size: {fsz}pt')
         ui.element()
 
         with ui.column().classes('w-full h-full p-0'):
             off_targets_input = ui.textarea(
                 placeholder='GACGCATAAAGATGAGACGCTGG,\nGACGCATAAAGATGAGACGCTGG,\n...',
-                validation=lambda x: sequence_validation(x, None)
-            ).props('rows=5 dense').classes('w-[280px] h-2fr font-mono')
-            ui.element().classes("h-1")
+                validation=lambda x: sequence_validation(x, None),
+                value=(('GACGAACAAAGATGAGACGCTGG,\n' +
+                        'GACGCATATATACGAGACGCTGG,\n' +
+                        'GACGCATAATTATGAGTCGCTGG,\n' +
+                        'GACGCATACCGATGTGTCGCTGG,\n' +
+                        'GACGCATAAAGATGGGGCTCTGG')
+                       if initial_input else None) ,
+            ).props('rows=5 dense').classes(f'w-[{wc1 - 20}px] h-2fr font-mono').style(f'font-size: {fsz}pt')
 
         with ui.row(align_items='start').classes('w-full h-full p-0'):
-            with ui.row(align_items='center').classes('w-full h-[52px]'):
-                ui.button('upload').props('outline no-caps')
+            ui.button('upload').props('outline no-caps').style(f'font-size: {fsz}pt')
 
         # CONCENTRATION
         with ui.element().classes('w-full h-full p-0'):
-            with ui.row(align_items='start').classes('w-[280px] gap-0'):
-                ui.markdown('**RNP concentration**').classes(
-                    'w-1/2 leading-[1.7]')
-                rnp_concentration_input = (ui.input(placeholder='100',
-                                                    validation=concentration_validation)
-                                           .props('dense suffix="nM"')
-                                           .classes('w-1/2'))
-            ui.element().classes("h-4")
+            with ui.row(align_items='start').classes(f'w-[{wc1 - 20}px] gap-0'):
+                ui.markdown('**RNP concentration**').classes('leading-[1.7]').style(f'font-size: {fsz}pt')
+                ui.space()
+                rnp_concentration_input = (
+                    ui.input(placeholder='100',
+                             validation=concentration_validation,
+                             value=(100 if initial_input else None))
+                    .props('dense suffix="nM"')
+                    .classes('w-[70px]')
+                    .style(f'font-size: {fsz}pt')
+                )
 
         ui.element()
 
         # PARAMETER SELECTION
         with ui.row(align_items='center').classes('w-full p-0'):
-            ui.markdown('**Model parameters**').classes('leading-[0.7]')
+            ui.markdown('**Model parameters**').classes('leading-[0.7]').style(f'font-size: {fsz}pt')
             (ui.icon('info')
              .tooltip('Select the model for cleavage predictions.')
-             .style('font-size: 20px'))
+             .style(f'font-size: {fsz}pt'))
         ui.element()
 
         with ui.column().classes('w-full h-full p-0'):
             model_dropdown = ui.select(
                 options={
-                    'sequence_params': 'sequence-params2 (recommended)',
+                    'sequence_params': 'sequence-params2 (default)',
                     'average_params': 'average-params',
                     'average_params_legacy': 'average-params-legacy'
                 },
                 value='sequence_params'
-            ).props('dense').classes('w-[280px] p-0 m-0')
+            ).props('dense').classes(f'w-[{wc1 - 20}px] p-0 m-0').style(f'font-size: {fsz}pt')
 
         with ui.row(align_items='center').classes('h-full w-full p-0'):
             (ui.button(icon='search')
@@ -150,8 +158,12 @@ def show_input():
         ui.element().classes("h-6")
         ui.element()
 
-        submit_button = (ui.button('Submit').props('icon=send')
-                         .classes('w-[280px]'))
+        submit_button = (
+            ui.button('Submit')
+            .props('icon=send')
+            .classes('w-[280px]')
+            .style(f'font-size: {fsz}pt')
+        )
 
     def get_input_values():
         ontarget = process_ontarget_input(
