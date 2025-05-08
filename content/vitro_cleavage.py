@@ -341,7 +341,10 @@ def show_output(output_container, get_input_values: callable):
 
         selected_ids = await get_selected_ids()
         if selected_ids:
-            await plot_selection()
+            if len(selected_ids) > 9:
+                ui.notify("Select at most 9 targets for inspection.", type='warning')
+            else:
+                await plot_selection()
 
         elif not showing_selection:
             ui.notify("No targets selected to show.", type='warning')
@@ -364,104 +367,97 @@ def show_output(output_container, get_input_values: callable):
             selection_container.clear()
 
             with selection_container:
-                dpi = plt.rcParams['figure.dpi']  # pixel in inches
-                with ui.matplotlib(figsize=(1200/dpi, 250/dpi)).classes().figure as fig1:
-                    spec1 = fig.add_gridspec(
-                        ncols=3, nrows=1, right=.8, wspace=.5, bottom=0.2
-                    )
-                    spec2 = fig.add_gridspec(
-                        ncols=1, nrows=1, left=.825,
-                    )
-
-                    ax0 = fig1.add_subplot(spec1[0, 0])
-                    ax0.set_facecolor('#ECF0F1')
-                    for i in selected_ids:
-                        stc = protein_sequence_complexes[i]
-                        landscape = stc._get_off_target_landscape()
-                        sol_stab = np.log(
-                            k_on_ref * concentration / stc.internal_rates['k_off']
+                with ui.column(align_items='center'):
+                    dpi = plt.rcParams['figure.dpi']  # pixel in inches
+                    with ui.matplotlib(figsize=(750 / dpi, 600 / dpi)).classes('w-[750px] h-[600px]').figure as fig1:
+                        spec0 = fig.add_gridspec(
+                            ncols=2, nrows=2,
+                            wspace=.5, hspace=.6,
                         )
-                        ax0.plot(
-                            np.arange(22) - 1,
-                            np.concatenate([np.array([sol_stab, 0]), landscape]),
-                            zorder=5 - .1 * i,
+
+                        ax0 = fig1.add_subplot(spec0[0, 0])
+                        ax0.set_facecolor('#ECF0F1')
+                        for i in selected_ids:
+                            stc = protein_sequence_complexes[i]
+                            landscape = stc._get_off_target_landscape()
+                            sol_stab = np.log(
+                                k_on_ref * concentration / stc.internal_rates['k_off']
+                            )
+                            ax0.plot(
+                                np.arange(22) - 1,
+                                np.concatenate([np.array([sol_stab, 0]), landscape]),
+                                label=('target (#0)' if i == 0 else f'off-target #{i}'),
+                                zorder=5 - .1 * i,
+                            )
+                        ax0.set_xlabel('R-loop length $b$')
+                        ax0.set_xticks(
+                            [-1, 0, 1, 5, 10, 15, 20],
+                            ['S', 'P', '1', '5', '10', '15', '20'],
                         )
-                    ax0.set_xlabel('R-loop length $b$')
-                    ax0.set_xticks(
-                        [-1, 0, 1, 5, 10, 15, 20],
-                        ['S', 'P', '1', '5', '10', '15', '20'],
-                    )
-                    ax0.grid(axis='x')
-                    ax0.set_title("R-loop landscape")
+                        ax0.grid(axis='x')
+                        ax0.set_title("R-loop landscape")
 
-                    lims0 = ax0.get_ylim()
-                    ax0.vlines([0, 5, 10, 15, 20], -50, 50,
-                               color='white', zorder=0, lw=.8)
-                    ax0.set_ylim(*lims0)
-                    ax0.set_ylabel(r"free energy $\Delta U_b$ ($k_BT$)")
-                    ax0.set_facecolor('#ECF0F1')
+                        lims0 = ax0.get_ylim()
+                        ax0.vlines([0, 5, 10, 15, 20], -50, 50,
+                                   color='white', zorder=0, lw=.8)
+                        ax0.set_ylim(*lims0)
+                        ax0.set_ylabel(r"free energy $\Delta U_b$ ($k_BT$)")
+                        ax0.set_facecolor('#ECF0F1')
+                        ax0.legend(bbox_to_anchor=(1.1, 1.05))
 
-                    # FIGURE 1 - Cleaved fraction vs time
-                    ax1 = fig1.add_subplot(spec1[0, 1])
-                    dt = np.logspace(-1, 6)
-                    for i in selected_ids:
-                        stc = protein_sequence_complexes[i]
-                        f_clv = stc.get_cleaved_fraction(dt, binding_rate)
-                        ax1.plot(
-                            dt, f_clv,
-                            label=('target (#0)' if i == 0 else f'off-target #{i}'),
-                            zorder=5 - .1* i,
-                        )
-                    ax1.set_xscale('log')
-                    ax1.set_xlabel('time $t$ (s)')
-                    ax1.set_xlim(dt.min(), dt.max())
+                        # FIGURE 1 - Cleaved fraction vs time
+                        ax1 = fig1.add_subplot(spec0[1, 0])
+                        dt = np.logspace(-1, 6)
+                        for i in selected_ids:
+                            stc = protein_sequence_complexes[i]
+                            f_clv = stc.get_cleaved_fraction(dt, binding_rate)
+                            ax1.plot(
+                                dt, f_clv,
+                                label=('target (#0)' if i == 0 else f'off-target #{i}'),
+                                zorder=5 - .1* i,
+                            )
+                        ax1.set_xscale('log')
+                        ax1.set_xlabel('time $t$ (s)')
+                        ax1.set_xlim(dt.min(), dt.max())
 
-                    ax1.set_ylim(-.1, 1.1)
-                    ax1.set_ylabel("fraction cleaved $f_{clv}$")
+                        ax1.set_ylim(-.1, 1.1)
+                        ax1.set_ylabel("fraction cleaved $f_{clv}$")
 
-                    ax1.set_facecolor('#ECF0F1')
-                    ax1.set_title("cleavage vs time")
+                        ax1.set_facecolor('#ECF0F1')
+                        ax1.set_title("cleavage vs time")
 
-                    # FIGURE 2 - Cleavage rate vs concentration
-                    ax2 = fig1.add_subplot(spec1[0, 2])
+                        # FIGURE 2 - Cleavage rate vs concentration
+                        ax2 = fig1.add_subplot(spec0[1, 1])
 
-                    # Concentration range, currently hardcoded and needs a better solution
-                    conc_logmin = -2  # nM
-                    conc_logmax = 3  # nM
-                    dc = np.logspace(conc_logmin, conc_logmax)
+                        # Concentration range, currently hardcoded and needs a better solution
+                        conc_logmin = -2  # nM
+                        conc_logmax = 3  # nM
+                        dc = np.logspace(conc_logmin, conc_logmax)
 
-                    for i in selected_ids:
-                        stc = protein_sequence_complexes[i]
-                        k_fit = [get_cleavage_rate(stc, k_on_ref * c)
-                                 for c in dc]
-                        ax2.plot(
-                            dc, k_fit,
-                            label=f'{"on" if i==0 else "off"}-target #{i}',
-                            zorder=5 - .1* i
-                        )
-                        ax2.plot(
-                            concentration, get_cleavage_rate(stc, k_on_ref * concentration),
-                            marker='o',
-                            zorder=5 - .1 * i,
-                            color=ax2.lines[-1].get_color()
-                        )
-                    ax2.set_xscale('log')
-                    ax2.set_xlabel('RNP concentration $c$ (nM)')
-                    ax2.set_xlim(dc.min(), dc.max())
+                        for i in selected_ids:
+                            stc = protein_sequence_complexes[i]
+                            k_fit = [get_cleavage_rate(stc, k_on_ref * c)
+                                     for c in dc]
+                            ax2.plot(
+                                dc, k_fit,
+                                label=f'{"on" if i==0 else "off"}-target #{i}',
+                                zorder=5 - .1* i
+                            )
+                            ax2.plot(
+                                concentration, get_cleavage_rate(stc, k_on_ref * concentration),
+                                marker='o',
+                                zorder=5 - .1 * i,
+                                color=ax2.lines[-1].get_color()
+                            )
+                        ax2.set_xscale('log')
+                        ax2.set_xlabel('RNP concentration $c$ (nM)')
+                        ax2.set_xlim(dc.min(), dc.max())
 
-                    ax2.set_yscale('log')
-                    ax2.set_ylabel("cleavage rate $k_{clv}$ ($s^{-1}$)")
+                        ax2.set_yscale('log')
+                        ax2.set_ylabel("cleavage rate $k_{clv}$ ($s^{-1}$)")
 
-                    ax2.set_facecolor('#ECF0F1')
-                    # ax2.legend()
-                    ax2.set_title("cleavage vs concentration")
-
-                    ax3 = fig1.add_subplot(spec2[0, 0])
-                    h, l = ax1.get_legend_handles_labels()
-                    ax3.grid('off')
-                    ax3.set_axis_off()
-                    ax3.set_facecolor('None')
-                    ax3.legend(h, l, loc='center left')
+                        ax2.set_facecolor('#ECF0F1')
+                        ax2.set_title("cleavage vs concentration")
 
         except Exception as e:
             ui.notify(f'Error: {str(e)}', type='negative')
