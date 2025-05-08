@@ -72,7 +72,7 @@ def show_input():
         return None  # Return None if the input is valid
 
     wc1 = 230  # column 1 width
-    wc2 = 100   # column 2 width
+    wc2 = 100  # column 2 width
     fsz = 10   # font size (in pt)
 
     # CONTENT
@@ -166,7 +166,7 @@ def show_input():
         submit_button = (
             ui.button('Submit')
             .props('icon=send')
-            .classes('w-[280px]')
+            .classes(f'w-[{wc1 - 20}px]')
             .style(f'font-size: {fsz}pt')
         )
 
