@@ -247,15 +247,14 @@ def show_output(output_container, get_input_values: callable):
     output_container.clear()
     with output_container:
         with ui.column(align_items='center').classes('w-full'):
-            plot_row = ui.row(align_items='center').classes('gap-0')
+            plot_row = ui.row(align_items='start').classes('gap-0')
         selection_container = ui.element('div').classes('w-full')  # determine width!
         showing_selection = False
-
 
     with plot_row:
 
         # Table
-        with ui.column(align_items='center').classes('w-[375px]'):
+        with ui.column(align_items='center').classes('w-[360px]'):
 
             def to_sci_html(val):
                 scistr = f"{val:.2e}"
@@ -273,45 +272,78 @@ def show_output(output_container, get_input_values: callable):
             </style>
             ''')
             default_coldefs = {'suppressMovable': True, 'sortable': False, 'resizable': False}
+            column_defs = [
+                dict(cd, **default_coldefs) for cd in [
+                    {'headerName': '', 'field': 'select', 'width': '40',
+                     'checkboxSelection': True,
+                     'headerCheckboxSelection': True},
+                    {'headerName': '#', 'field': 'index', 'width': '40'},
+                    {'headerName': 'sequence', 'field': 'sequence',
+                     'width': '200', 'cellClass': 'monospace-column'},
+                    {'headerName': 'k_clv (s⁻¹)', 'field': 'k_clv',
+                     'width': '90'}
+                ]]
 
             grid = ui.aggrid({
-                'columnDefs': [dict(cd, **default_coldefs) for cd in [
-                    {'headerName': '', 'field': 'select', 'width': '40', 'checkboxSelection': True, 'headerCheckboxSelection': True},
-                    {'headerName': '#', 'field': 'index', 'width': '40'},
-                    {'headerName': 'sequence', 'field': 'sequence', 'width': '200', 'cellClass': 'monospace-column'},
-                    {'headerName': 'k_clv (s⁻¹)', 'field': 'k_clv', 'width': '90'}
-                ]],
-                'rowData': [
-                    {'index': i, 'sequence': targets[i], 'k_clv': to_sci_html(values[i])}
-                    for i in range(len(targets))
-                ],
+                'columnDefs': column_defs,
+                'rowData': [{'index': i, 'sequence': targets[i], 'k_clv': to_sci_html(values[i])}
+                            for i in range(len(targets))],
                 'rowSelection': 'multiple'
             }, html_columns=[3], auto_size_columns=True)
+
+            sorted_kclv = False
+
+            async def get_selected_ids():
+                selection = await grid.get_selected_rows()
+                selected_ids = [r['index'] for r in selection]
+                return sorted(selected_ids)
+
+            async def sort_grid_kclv():
+                nonlocal grid
+                selected_ids = await get_selected_ids()
+                grid.options['rowData'] = [
+                    {'index': i, 'sequence': targets[i], 'k_clv': to_sci_html(values[i])}
+                    for i in reversed(np.argsort(values))
+                ]
+                for i in np.argsort(values)[::-1][selected_ids]:
+                    grid.run_row_method(i, 'setSelected', True)
+                grid.update()
+
+            async def sort_grid_index():
+                nonlocal grid
+                selected_ids = await get_selected_ids()
+                grid.options['rowData'] = [
+                    {'index': i, 'sequence': targets[i], 'k_clv': to_sci_html(values[i])}
+                    for i in range(len(targets))
+                ]
+                for i in selected_ids:
+                    grid.run_row_method(i, 'setSelected', True)
+                grid.update()
 
             with ui.row(align_items='center').classes('w-full'):
                 show_button = ui.button("SHOW").classes('w-[100px]')
 
                 ui.icon('info').tooltip('Tip')
                 ui.space()
-                sort_button = ui.button().props('no-caps outline')
+                sort_button = ui.button().props('no-caps').classes("w-[120px]")
                 with sort_button:
                     ui.html("sort by <i>k<sub>clv</sub></i>")
+                download_button = ui.button().props('icon=download no-caps outline').classes('w-[1em] h-[1em]')
 
-        async def get_selected_ids():
-            selection = await grid.get_selected_rows()
-            selected_ids =  [r['index'] for r in selection]
-            return sorted(selected_ids)
+
+        ui.element().classes('w-[15px]')
 
         # Plot
         dpi = plt.rcParams['figure.dpi']  # pixel in inches
         with ui.matplotlib(figsize=(375 / dpi, 250 / dpi)).classes('w-[375px] h-[250px]').figure as fig:
             ax = fig.gca()
-            ax.bar(indices, values, align='center',
+            ax.bar(indices, values, width=.8, align='center',
                    color="#5898d4", alpha=.8)
             ax.set_yscale('log')
             ax.set_title("Cleavage rate $k_{clv}$ ($s^{-1}$)")
             ax.set_facecolor('#ECF0F1')
             ax.grid(axis='x')
+            ax.set_xticks(indices)
             fig.tight_layout()
 
             async def grid_selection_handler():
@@ -324,7 +356,6 @@ def show_output(output_container, get_input_values: callable):
 
             async def highlight_selected_bars():
                 selected_ids = await get_selected_ids()
-
                 with fig:
                     if selected_ids:
                         for i, bar in enumerate(ax.patches):
@@ -332,7 +363,21 @@ def show_output(output_container, get_input_values: callable):
                     else:
                         for i, bar in enumerate(ax.patches):
                             bar.set_alpha(.6)
-                ui.update(fig)
+
+            def sort_plot_kclv():
+                sorted_positions = np.argsort(values)[::-1]
+                with fig:
+                    for i, xpos in enumerate(sorted_positions):
+                        bar = ax.patches[i]
+                        bar.set_x(xpos - .4)
+                    ax.set_xticks(indices, indices[sorted_positions])
+
+            def sort_plot_index():
+                with fig:
+                    for i in range(len(values)):
+                        bar = ax.patches[i]
+                        bar.set_x(i - .4)
+                    ax.set_xticks(indices, indices)
 
             grid.on('selectionChanged', grid_selection_handler)
 
@@ -464,6 +509,26 @@ def show_output(output_container, get_input_values: callable):
 
     show_button.on_click(handle_show_click)
 
+    async def handle_sort_click():
+        nonlocal sorted_kclv
+
+        if not sorted_kclv:
+            await sort_grid_kclv()
+            sort_plot_kclv()
+            sort_button.clear()
+            with sort_button:
+                ui.html("sort by index")
+            sorted_kclv = True
+
+        else:
+            await sort_grid_index()
+            sort_plot_index()
+            sort_button.clear()
+            with sort_button:
+                ui.html("sort by <i>k<sub>clv</sub></i>")
+            sorted_kclv = False
+
+    sort_button.on_click(handle_sort_click)
 
 def show_contents():
     with ui.row().classes('w-full h-full no-wrap'):
