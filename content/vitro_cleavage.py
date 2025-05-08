@@ -566,7 +566,7 @@ def show_contents():
 
 @ui.page("/")
 def index():
-    show_input()
+    show_contents()
 
 
 ui.run()
