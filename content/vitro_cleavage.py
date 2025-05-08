@@ -344,6 +344,8 @@ def show_output(output_container, get_input_values: callable):
             ax.set_facecolor('#ECF0F1')
             ax.grid(axis='x')
             ax.set_xticks(indices)
+            if len(values) > 16:
+                ax.tick_params(axis='both', labelsize='x-small')
             fig.tight_layout()
 
             async def grid_selection_handler():
