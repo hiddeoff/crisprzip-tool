@@ -279,7 +279,7 @@ def show_output(output_container, get_input_values: callable):
                      'headerCheckboxSelection': True},
                     {'headerName': '#', 'field': 'index', 'width': '40'},
                     {'headerName': 'sequence', 'field': 'sequence',
-                     'width': '200', 'cellClass': 'monospace-column'},
+                     'width': '220', 'cellClass': 'monospace-column'},
                     {'headerName': 'k_clv (s⁻¹)', 'field': 'k_clv',
                      'width': '90'}
                 ]]
