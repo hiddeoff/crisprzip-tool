@@ -1,6 +1,5 @@
 import re
 
-from docutils.parsers.rst.directives.tables import align
 from nicegui import ui
 from scipy.optimize import curve_fit
 import pandas as pd
