@@ -3,6 +3,7 @@ import re
 from docutils.parsers.rst.directives.tables import align
 from nicegui import ui
 from scipy.optimize import curve_fit
+import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
@@ -255,7 +256,7 @@ def show_output(output_container, get_input_values: callable):
         selection_container = ui.element('div').classes('w-full')  # determine width!
         showing_selection = False
 
-    with (plot_row):
+    with plot_row:
 
         # Table
         with ui.column(align_items='center').classes('w-[360px]'):
@@ -386,6 +387,36 @@ def show_output(output_container, get_input_values: callable):
 
             grid.on('selectionChanged', grid_selection_handler)
 
+    sorted_kclv = False
+
+    async def handle_sort_click():
+        nonlocal sorted_kclv
+
+        if not sorted_kclv:
+            await sort_grid_kclv()
+            sort_plot_kclv()
+            sort_button.clear()
+            with sort_button:
+                ui.html("sort by index")
+            sorted_kclv = True
+
+        else:
+            await sort_grid_index()
+            sort_plot_index()
+            sort_button.clear()
+            with sort_button:
+                ui.html("sort by <i>k<sub>clv</sub></i>")
+            sorted_kclv = False
+
+    sort_button.on_click(handle_sort_click)
+
+    def download_grid():
+        df = pd.DataFrame({'sequence': targets, 'k_clv [1/s]': values})
+        csv_string = df.to_csv(index=True)
+        ui.download.content(csv_string, 'crisprzip_kclv.csv')
+
+    download_button.on_click(download_grid)
+
     async def handle_show_click():
         nonlocal showing_selection
 
@@ -514,28 +545,7 @@ def show_output(output_container, get_input_values: callable):
 
     show_button.on_click(handle_show_click)
 
-    sorted_kclv = False
 
-    async def handle_sort_click():
-        nonlocal sorted_kclv
-
-        if not sorted_kclv:
-            await sort_grid_kclv()
-            sort_plot_kclv()
-            sort_button.clear()
-            with sort_button:
-                ui.html("sort by index")
-            sorted_kclv = True
-
-        else:
-            await sort_grid_index()
-            sort_plot_index()
-            sort_button.clear()
-            with sort_button:
-                ui.html("sort by <i>k<sub>clv</sub></i>")
-            sorted_kclv = False
-
-    sort_button.on_click(handle_sort_click)
 
 def show_contents():
     with ui.row().classes('w-full h-full no-wrap'):
