@@ -225,6 +225,10 @@ def show_output(output_container, get_input_values: callable):
 
     protospacer, off_targets, concentration, parameter_set = get_input_values().values()
 
+    if len(off_targets) > 25:
+        ui.notify("Can't process more than 25 off-targets at once", type='warning')
+        return
+
     protein_sequence_complexes = make_stc_list(
         protospacer=protospacer,
         off_targets=off_targets,
@@ -251,7 +255,7 @@ def show_output(output_container, get_input_values: callable):
         selection_container = ui.element('div').classes('w-full')  # determine width!
         showing_selection = False
 
-    with plot_row:
+    with (plot_row):
 
         # Table
         with ui.column(align_items='center').classes('w-[360px]'):
@@ -291,8 +295,6 @@ def show_output(output_container, get_input_values: callable):
                 'rowSelection': 'multiple'
             }, html_columns=[3], auto_size_columns=True)
 
-            sorted_kclv = False
-
             async def get_selected_ids():
                 selection = await grid.get_selected_rows()
                 selected_ids = [r['index'] for r in selection]
@@ -305,8 +307,9 @@ def show_output(output_container, get_input_values: callable):
                     {'index': i, 'sequence': targets[i], 'k_clv': to_sci_html(values[i])}
                     for i in reversed(np.argsort(values))
                 ]
-                for i in np.argsort(values)[::-1][selected_ids]:
-                    grid.run_row_method(i, 'setSelected', True)
+                for i in range(len(values)):
+                    if np.argsort(values)[::-1][i] in selected_ids:
+                        grid.run_row_method(i, 'setSelected', True)
                 grid.update()
 
             async def sort_grid_index():
@@ -369,7 +372,7 @@ def show_output(output_container, get_input_values: callable):
             def sort_plot_kclv():
                 sorted_positions = np.argsort(values)[::-1]
                 with fig:
-                    for i, xpos in enumerate(sorted_positions):
+                    for xpos, i in enumerate(reversed(np.argsort(values))):
                         bar = ax.patches[i]
                         bar.set_x(xpos - .4)
                     ax.set_xticks(indices, indices[sorted_positions])
@@ -510,6 +513,8 @@ def show_output(output_container, get_input_values: callable):
             ui.notify(f'Error: {str(e)}', type='negative')
 
     show_button.on_click(handle_show_click)
+
+    sorted_kclv = False
 
     async def handle_sort_click():
         nonlocal sorted_kclv
