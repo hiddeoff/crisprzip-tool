@@ -619,7 +619,7 @@ def show_contents():
 
         # INPUT
         with ui.card().classes('p-4 m-2'):
-            submit_button, get_input_values = show_input()
+            submit_button, get_input_values, model_dropdown = show_input()
 
         # OUTPUT
         output_container = ui.column().classes('w-full h-full no-wrap m-2')
