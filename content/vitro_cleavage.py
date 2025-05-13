@@ -185,7 +185,9 @@ def show_input():
                     'average_params': 'average-params',
                     'average_params_legacy': 'average-params-legacy'
                 },
-                value='sequence_params'
+                #value='sequence_params'
+                # notify user about the selected model
+                on_change=lambda e: ui.notify( f'Selected model: {e.value}' )
             ).props('dense').classes(f'w-[{wc1 - 20}px] p-0 m-0').style(f'font-size: {fsz}pt')
 
         with ui.row(align_items='center').classes('h-full w-full p-0'):
