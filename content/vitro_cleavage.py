@@ -238,13 +238,27 @@ def show_output(output_container, get_input_values: callable):
     # PROCESSING USER INPUT
     def make_stc_list(protospacer, off_targets, parameter_set):
         """Generate SearcherTargetComplexes."""
-        bare_protein = crisprzip.kinetics.load_landscape(parameter_set)
-        guided_protein = bare_protein.bind_guide_rna(protospacer=protospacer)
+        if parameter_set == 'sequence_params':
+            bare_protein = crisprzip.kinetics.load_landscape(parameter_set)
+            guided_protein = bare_protein.bind_guide_rna(protospacer=protospacer)
 
-        targets = [protospacer] + off_targets
-        protein_sequence_complexes = [guided_protein.probe_sequence(target_seq)
-                                      for target_seq in targets]
-        return protein_sequence_complexes
+            targets = [protospacer] + off_targets
+            protein_sequence_complexes = [guided_protein.probe_sequence(target_seq)
+                                          for target_seq in targets]
+            return protein_sequence_complexes
+        elif (parameter_set == 'average_params') or (parameter_set == 'average_params_legacy'):
+            protein = crisprzip.kinetics.load_landscape(parameter_set)
+            
+            targets = [protospacer] + off_targets
+            protein_sequence_complexes = []
+            for target_seq in targets:
+                mm_pattern = (GuideTargetHybrid
+                              .from_cas9_offtarget(target_seq, protospacer)
+                              .get_mismatch_pattern())
+                protein_sequence_complexes += [protein.probe_target(mm_pattern)]
+            return protein_sequence_complexes
+        else:
+            raise ValueError(f"Unrecognized parameter set '{parameter_set}'.")
 
     def get_cleavage_rate(stc, binding_rate):
         """Calculate cleavage rate."""
