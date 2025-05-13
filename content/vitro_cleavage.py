@@ -137,7 +137,7 @@ def show_input():
                         'GACGCATATATACGAGACGCTGG,\n' +
                         'GACGCATAATTATGAGTCGCTGG,\n' +
                         'GACGCATACCGATGTGTCGCTGG,\n' +
-                        'GACGCATAAAGATGGGGCTCTGG')
+                        'GACGCATAAAGATGGGGCTCTGG,\n')
                        if initial_input else None) ,
             ).props('rows=5 dense').classes(f'w-[{wc1 - 20}px] h-2fr font-mono').style(f'font-size: {fsz}pt')
 
@@ -288,8 +288,8 @@ def show_output(output_container, get_input_values: callable):
 
     protospacer, off_targets, concentration, parameter_set = get_input_values().values()
 
-    if len(off_targets) > 25:
-        ui.notify("Can't process more than 25 off-targets at once", type='warning')
+    if len(off_targets) > 250:
+        ui.notify(f"Can't process {len(off_targets)} off-targets at once! (max. 250)", type='warning')
         return
 
     protein_sequence_complexes = make_stc_list(
@@ -403,19 +403,53 @@ def show_output(output_container, get_input_values: callable):
         ui.element().classes('w-[15px]')
 
         # Plot
-        dpi = plt.rcParams['figure.dpi']  # pixel in inches
-        with ui.matplotlib(figsize=(375 / dpi, 250 / dpi)).classes('w-[375px] h-[250px]').figure as fig:
-            ax = fig.gca()
-            ax.bar(indices, values, width=.8, align='center',
-                   color="#5898d4", alpha=.8)
-            ax.set_yscale('log')
-            ax.set_title("Cleavage rate $k_{clv}$ ($s^{-1}$)")
-            ax.set_facecolor('#ECF0F1')
-            ax.grid(axis='x')
-            ax.set_xticks(indices)
-            if len(values) > 16:
-                ax.tick_params(axis='both', labelsize='x-small')
-            fig.tight_layout()
+        with ui.column(align_items='center').classes('gap-0 p-0'):
+            dpi = plt.rcParams['figure.dpi']  # pixel in inches
+
+            # title
+            with ui.matplotlib(figsize=(365 / dpi, 25 / dpi)).classes('w-[365px] h-[25px]').figure as tfig:
+                t_ax = tfig.gca()
+                t_ax.text(.5, .5, r"cleavage rate $k_{clv}$ ($s^{-1}$)",
+                          va='center', ha='center', fontsize='large')
+                tfig.tight_layout()
+                t_ax.set_axis_off()
+
+            with ui.row().classes('gap-0 p-0'):
+
+                # y axis
+                fig0 = ui.matplotlib(figsize=(40 / dpi, 250 / dpi)).classes('w-[40px] h-[250px]').figure
+
+                ui.add_css('''
+                    .nicegui-scroll-area .q-scrollarea__content {
+                        padding: 0;
+                    }
+                    ''')
+
+                # plot contents
+                plotwidth = max(325, 25 * len(targets))
+                with ui.scroll_area().classes(f'w-[325px] h-[250px]'):
+                    with ui.matplotlib(figsize=(plotwidth / dpi, 250 / dpi)).classes(f'w-[{plotwidth}px] h-[250px]').figure as fig:
+                        ax = fig.gca()
+                        ax.bar(indices, values, width=.8, align='center',
+                               color="#5898d4", alpha=.8)
+                        ax.set_yscale('log')
+                        ax.set_facecolor('#ECF0F1')
+                        ax.grid(axis='x')
+                        ax.set_xticks(indices)
+                        x_margin = (min(15, len(targets)) - 1) / 15  # margin of 0-1
+                        ax.set_xlim(-.5 - x_margin, indices[-1] + .5 + x_margin)
+                        ax.get_yaxis().set_ticklabels([])
+                        fig.subplots_adjust(left=0., right=1., bottom=.15, top=.95)
+
+                with fig0:
+                    ax0 = fig0.gca()
+                    ax0.set_facecolor('None')
+                    ax0.set_yscale('log')
+                    ax0.set_yticks(ax.get_yticks())
+                    ax0.set_ylim(*ax.get_ylim())
+                    ax0.set_xlim(0, 0)
+                    ax0.get_xaxis().set_visible(False)
+                    fig0.subplots_adjust(left=.99, right=1., bottom=.15, top=.95)
 
             async def grid_selection_handler():
                 selected_ids = await get_selected_ids()
