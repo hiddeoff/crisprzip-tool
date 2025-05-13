@@ -185,7 +185,9 @@ def show_input():
                     'average_params': 'average-params',
                     'average_params_legacy': 'average-params-legacy'
                 },
-                value='sequence_params'
+                #value='sequence_params'
+                # notify user about the selected model
+                on_change=lambda e: ui.notify( f'Selected model: {e.value}' )
             ).props('dense').classes(f'w-[{wc1 - 20}px] p-0 m-0').style(f'font-size: {fsz}pt')
 
         with ui.row(align_items='center').classes('h-full w-full p-0'):
@@ -227,7 +229,8 @@ def show_input():
         }
         return input_vals
 
-    return submit_button, get_input_values
+    # Return the submit button and the function to get input values
+    return submit_button, get_input_values, model_dropdown
 
 
 def show_output(output_container, get_input_values: callable):
@@ -235,13 +238,27 @@ def show_output(output_container, get_input_values: callable):
     # PROCESSING USER INPUT
     def make_stc_list(protospacer, off_targets, parameter_set):
         """Generate SearcherTargetComplexes."""
-        bare_protein = crisprzip.kinetics.load_landscape(parameter_set)
-        guided_protein = bare_protein.bind_guide_rna(protospacer=protospacer)
+        if parameter_set == 'sequence_params':
+            bare_protein = crisprzip.kinetics.load_landscape(parameter_set)
+            guided_protein = bare_protein.bind_guide_rna(protospacer=protospacer)
 
-        targets = [protospacer] + off_targets
-        protein_sequence_complexes = [guided_protein.probe_sequence(target_seq)
-                                      for target_seq in targets]
-        return protein_sequence_complexes
+            targets = [protospacer] + off_targets
+            protein_sequence_complexes = [guided_protein.probe_sequence(target_seq)
+                                          for target_seq in targets]
+            return protein_sequence_complexes
+        elif (parameter_set == 'average_params') or (parameter_set == 'average_params_legacy'):
+            protein = crisprzip.kinetics.load_landscape(parameter_set)
+            
+            targets = [protospacer] + off_targets
+            protein_sequence_complexes = []
+            for target_seq in targets:
+                mm_pattern = (GuideTargetHybrid
+                              .from_cas9_offtarget(target_seq, protospacer)
+                              .get_mismatch_pattern())
+                protein_sequence_complexes += [protein.probe_target(mm_pattern)]
+            return protein_sequence_complexes
+        else:
+            raise ValueError(f"Unrecognized parameter set '{parameter_set}'.")
 
     def get_cleavage_rate(stc, binding_rate):
         """Calculate cleavage rate."""
@@ -602,7 +619,7 @@ def show_contents():
 
         # INPUT
         with ui.card().classes('p-4 m-2'):
-            submit_button, get_input_values = show_input()
+            submit_button, get_input_values, model_dropdown = show_input()
 
         # OUTPUT
         output_container = ui.column().classes('w-full h-full no-wrap m-2')
