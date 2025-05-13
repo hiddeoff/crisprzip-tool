@@ -1,4 +1,8 @@
-from nicegui import ui
+# macOS packaging support
+from multiprocessing import freeze_support  # noqa
+freeze_support()  # noqa
+
+from nicegui import ui, native
 import content.vitro_cleavage
 
 @ui.page('/')
@@ -51,4 +55,4 @@ def index():
                     ui.label('IN VIVO - BINDING (dCas9) PLACEHOLDER')
 
 
-ui.run()
+ui.run(reload=False, native=True)
