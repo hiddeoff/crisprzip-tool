@@ -229,7 +229,8 @@ def show_input():
         }
         return input_vals
 
-    return submit_button, get_input_values
+    # Return the submit button and the function to get input values
+    return submit_button, get_input_values, model_dropdown
 
 
 def show_output(output_container, get_input_values: callable):
