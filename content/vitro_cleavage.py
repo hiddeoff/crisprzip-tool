@@ -181,13 +181,11 @@ def show_input():
         with ui.column().classes('w-full h-full p-0'):
             model_dropdown = ui.select(
                 options={
-                    'sequence_params': 'sequence-params2 (default)',
+                    'sequence_params': 'sequence-params (default)',
                     'average_params': 'average-params',
                     'average_params_legacy': 'average-params-legacy'
                 },
-                #value='sequence_params'
-                # notify user about the selected model
-                on_change=lambda e: ui.notify( f'Selected model: {e.value}' )
+                value='sequence_params',
             ).props('dense').classes(f'w-[{wc1 - 20}px] p-0 m-0').style(f'font-size: {fsz}pt')
 
         with ui.row(align_items='center').classes('h-full w-full p-0'):
