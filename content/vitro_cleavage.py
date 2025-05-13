@@ -1,18 +1,17 @@
 import re
+from io import StringIO
 
 from nicegui import ui, events
 from scipy.optimize import curve_fit
 import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from io import StringIO
-import pandas as pd
 
 from crisprzip import *
 from crisprzip.kinetics import *
 
 
-initial_input = False  # auto-fills upon load - useful when developing
+initial_input = True  # auto-fills upon load - useful when developing
 
 
 def show_input():
@@ -150,7 +149,7 @@ def show_input():
                     auto_upload=True
                 ).props("accept=.csv hide-upload-btn").classes('hidden') # can add .txt (for example) to .props if you want to uplaod something other than .csv files
                 # add custom ui button (instead of the regular upload button)
-                ui.button('Upload', on_click=lambda: (
+                ui.button('upload', on_click=lambda: (
                     upload_component.reset(),
                     upload_component.run_method('pickFiles')
                 )).props('outline no-caps').style(f'font-size: {fsz}pt')
