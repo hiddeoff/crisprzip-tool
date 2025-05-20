@@ -8,7 +8,7 @@ def index():
     with ui.header(elevated=True).style('background-color: #D9F0D2'):
         with ui.row().classes():
             # Image/icon to the left
-            ui.image('./img/CRISPRzip_logo_v0.jpg').props('width=45px height=45px')
+            ui.image('./img/CRISPRzip_logo_no_background.png').props('width=50px height=50px')
 
             # Text next to the image
             ui.label('CRISPRzip GUI').style('color: black; font-size: 32px; font-family: Courier New; font-weight: bold;')
