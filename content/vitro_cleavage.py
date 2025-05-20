@@ -16,12 +16,16 @@ initial_input = True  # auto-fills upon load - useful when developing
 
 def show_input():
 
-    def update_placeholder(value):
-        if value == 'protospacer':
-            target_sequence_input.placeholder = 'GACGCATAAAGATGAGACGCTGG'
-        elif value == 'guide RNA':
-            target_sequence_input.placeholder = 'GACGCAUAAAGAUGAGACGC'
-        target_sequence_input.update()  # Refresh the input to apply changes
+    def update_placeholder(e):
+        val = e.value
+        if val == 'protospacer':
+            placeholder = 'GACGCATAAAGATGAGACGCTGG'
+        else:
+            placeholder = 'GACGCAUAAAGAUGAGACGC'
+        target_sequence_input.props(f'placeholder={placeholder}')
+        # clear the value to see the hint (next line needs to be commented out later on)
+        #target_sequence_input.value = ''
+        target_sequence_input.update()
 
     def check_sequence_input(sequence):
         if len(sequence) != 23:
@@ -121,7 +125,7 @@ def show_input():
                           on_change=update_placeholder)
                 .classes('w-full').props('dense').style(f'font-size: {fsz}pt')
             )
-            update_placeholder(target_input_select.value)
+            update_placeholder(type('E',(object,),{'value': target_input_select.value})())
 
         # OFF-TARGET SEQUENCES
         with ui.row(align_items='center').classes('p-0'):
