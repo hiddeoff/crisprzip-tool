@@ -215,6 +215,7 @@ def show_input():
     # Return the submit button and the function to get input values
     return submit_button, get_input_values, model_dropdown
 
+# PROCESSING USER INPUT
 
 def get_k_on_off(context):
     if context == 'invitro':
@@ -239,66 +240,90 @@ def get_k_on_off(context):
     return k_on, k_off
 
 
+def make_stc_list(protospacer, off_targets, context, parameter_set):
+    """Generate SearcherTargetComplexes."""
+
+    k_on, k_off = get_k_on_off(context)
+
+    if parameter_set == 'sequence_params':
+        bare_protein = crisprzip.kinetics.load_landscape(parameter_set)
+        bare_protein.internal_rates['k_off'] = k_off
+        guided_protein = bare_protein.bind_guide_rna(protospacer=protospacer)
+
+        targets = [protospacer] + off_targets
+        protein_sequence_complexes = [guided_protein.probe_sequence(target_seq)
+                                      for target_seq in targets]
+        return protein_sequence_complexes
+
+    elif (parameter_set == 'average_params') or (parameter_set == 'average_params_legacy'):
+        protein = crisprzip.kinetics.load_landscape(parameter_set)
+        protein.internal_rates['k_off'] = k_off
+
+        targets = [protospacer] + off_targets
+        protein_sequence_complexes = []
+        for target_seq in targets:
+            mm_pattern = (GuideTargetHybrid
+                          .from_cas9_offtarget(target_seq, protospacer)
+                          .get_mismatch_pattern())
+            protein_sequence_complexes += [protein.probe_target(mm_pattern)]
+        return protein_sequence_complexes
+    else:
+        raise ValueError(f"Unrecognized parameter set '{parameter_set}'.")
+
+
+def get_cleavage_prob(stc):
+    """Calculate the probability that the target is cleaved
+    after it has been PAM-associated."""
+    gamma = (stc._get_backward_rate_array()[1:-1] /
+             stc.get_forward_rate_array(1.)[1:-1])
+    return 1 / (1 + np.sum(np.cumprod(gamma)))
+
+
+def get_all_cleavage_probs(protospacer, off_targets,
+                           context, parameter_set):
+    protein_sequence_complexes = make_stc_list(
+        protospacer=protospacer,
+        off_targets=off_targets,
+        context=context,
+        parameter_set=parameter_set,
+    )
+    p_clv_values = [get_cleavage_prob(stc) for stc in protein_sequence_complexes]
+    return p_clv_values
+
+
+def get_cleavage_rate(stc, binding_rate):
+    """Calculate cleavage rate."""
+    dt = np.logspace(-2, 6)
+    f_clv = stc.get_cleaved_fraction(dt, binding_rate)
+    with np.errstate(over='ignore'):  # ignore RuntimeWarning: overflow
+        k_eff = np.exp(curve_fit(
+            f=lambda t, logk: 1 - np.exp(-np.exp(logk) * t),
+            xdata=dt,
+            ydata=f_clv,
+        )[0][0])
+    return k_eff
+
+
+def get_all_cleavage_rates(protospacer, off_targets,
+                           context, parameter_set):
+    protein_sequence_complexes = make_stc_list(
+        protospacer=protospacer,
+        off_targets=off_targets,
+        context=context,
+        parameter_set=parameter_set,
+    )
+    k_on_ref = 1E-2
+    concentration = 100
+    binding_rate = k_on_ref * concentration
+
+    k_fit_values = [
+        get_cleavage_rate(stc, binding_rate) for
+        stc in protein_sequence_complexes
+    ]
+    return k_fit_values
+
+
 def show_output(output_container, get_input_values: callable):
-
-    # PROCESSING USER INPUT
-    def make_stc_list(protospacer, off_targets, context, parameter_set):
-        """Generate SearcherTargetComplexes."""
-
-        k_on, k_off = get_k_on_off(context)
-
-        if parameter_set == 'sequence_params':
-            bare_protein = crisprzip.kinetics.load_landscape(parameter_set)
-            bare_protein.internal_rates['k_off'] = k_off
-            guided_protein = bare_protein.bind_guide_rna(protospacer=protospacer)
-
-            targets = [protospacer] + off_targets
-            protein_sequence_complexes = [guided_protein.probe_sequence(target_seq)
-                                          for target_seq in targets]
-            return protein_sequence_complexes
-
-        elif (parameter_set == 'average_params') or (parameter_set == 'average_params_legacy'):
-            protein = crisprzip.kinetics.load_landscape(parameter_set)
-            protein.internal_rates['k_off'] = k_off
-
-            targets = [protospacer] + off_targets
-            protein_sequence_complexes = []
-            for target_seq in targets:
-                mm_pattern = (GuideTargetHybrid
-                              .from_cas9_offtarget(target_seq, protospacer)
-                              .get_mismatch_pattern())
-                protein_sequence_complexes += [protein.probe_target(mm_pattern)]
-            return protein_sequence_complexes
-        else:
-            raise ValueError(f"Unrecognized parameter set '{parameter_set}'.")
-
-    def get_cleavage_rate(stc, binding_rate):
-        """Calculate cleavage rate."""
-        dt = np.logspace(-2, 6)
-        f_clv = stc.get_cleaved_fraction(dt, binding_rate)
-        with np.errstate(over='ignore'):  # ignore RuntimeWarning: overflow
-            k_eff = np.exp(curve_fit(
-                f=lambda t, logk: 1 - np.exp(-np.exp(logk) * t),
-                xdata=dt,
-                ydata=f_clv,
-            )[0][0])
-        return k_eff
-
-    def get_all_cleavage_rates(protospacer, off_targets,
-                               parameter_set, concentration):
-        protein_sequence_complexes = make_stc_list(
-            protospacer=protospacer,
-            off_targets=off_targets,
-            parameter_set=parameter_set,
-        )
-        k_on_ref = 1E-2
-        binding_rate = k_on_ref * concentration
-
-        k_fit_values = [
-            get_cleavage_rate(stc, binding_rate) for
-            stc in protein_sequence_complexes
-        ]
-        return k_fit_values
 
     protospacer, off_targets, context, parameter_set = get_input_values().values()
 
@@ -309,6 +334,7 @@ def show_output(output_container, get_input_values: callable):
     protein_sequence_complexes = make_stc_list(
         protospacer=protospacer,
         off_targets=off_targets,
+        context=context,
         parameter_set=parameter_set,
     )
     cleavage_probs = get_all_cleavage_probs(
@@ -317,15 +343,9 @@ def show_output(output_container, get_input_values: callable):
         context=context,
         parameter_set=parameter_set,
     )
-    # cleavage_rates = get_all_cleavage_rates(
-    #     protospacer=protospacer,
-    #     off_targets=off_targets,
-    #     parameter_set=parameter_set,
-    #     concentration=concentration,
-    # )
 
     targets = [protospacer] + off_targets
-    values = cleavage_rates
+    values = cleavage_probs
     indices = np.arange(len(targets))
 
     # VISUALIZATION
@@ -367,13 +387,13 @@ def show_output(output_container, get_input_values: callable):
                     {'headerName': '#', 'field': 'index', 'width': '40'},
                     {'headerName': 'sequence', 'field': 'sequence',
                      'width': '220', 'cellClass': 'monospace-column'},
-                    {'headerName': 'k_clv (s⁻¹)', 'field': 'k_clv',
+                    {'headerName': 'p_clv', 'field': 'p_clv',
                      'width': '90'}
                 ]]
 
             grid = ui.aggrid({
                 'columnDefs': column_defs,
-                'rowData': [{'index': i, 'sequence': targets[i], 'k_clv': to_sci_html(values[i])}
+                'rowData': [{'index': i, 'sequence': targets[i], 'p_clv': to_sci_html(values[i])}
                             for i in range(len(targets))],
                 'rowSelection': 'multiple'
             }, html_columns=[3], auto_size_columns=True)
@@ -387,7 +407,7 @@ def show_output(output_container, get_input_values: callable):
                 nonlocal grid
                 selected_ids = await get_selected_ids()
                 grid.options['rowData'] = [
-                    {'index': i, 'sequence': targets[i], 'k_clv': to_sci_html(values[i])}
+                    {'index': i, 'sequence': targets[i], 'p_clv': to_sci_html(values[i])}
                     for i in reversed(np.argsort(values))
                 ]
                 for i in range(len(values)):
@@ -399,7 +419,7 @@ def show_output(output_container, get_input_values: callable):
                 nonlocal grid
                 selected_ids = await get_selected_ids()
                 grid.options['rowData'] = [
-                    {'index': i, 'sequence': targets[i], 'k_clv': to_sci_html(values[i])}
+                    {'index': i, 'sequence': targets[i], 'p_clv': to_sci_html(values[i])}
                     for i in range(len(targets))
                 ]
                 for i in selected_ids:
@@ -416,7 +436,7 @@ def show_output(output_container, get_input_values: callable):
                 ui.space()
                 sort_button = ui.button().props('no-caps').classes("w-[120px]")
                 with sort_button:
-                    ui.html("sort by <i>k<sub>clv</sub></i>")
+                    ui.html("sort by <i>p<sub>clv</sub></i>")
                 download_button = ui.button().props('icon=download no-caps outline').classes('w-[1em] h-[1em]')
 
 
@@ -429,7 +449,7 @@ def show_output(output_container, get_input_values: callable):
             # title
             with ui.matplotlib(figsize=(365 / dpi, 25 / dpi)).classes('w-[365px] h-[25px]').figure as tfig:
                 t_ax = tfig.gca()
-                t_ax.text(.5, .5, r"cleavage rate $k_{clv}$ ($s^{-1}$)",
+                t_ax.text(.5, .5, r"cleavage probability $p_{clv}$",
                           va='center', ha='center', fontsize='large')
                 tfig.tight_layout()
                 t_ax.set_axis_off()
@@ -524,7 +544,7 @@ def show_output(output_container, get_input_values: callable):
             sort_plot_index()
             sort_button.clear()
             with sort_button:
-                ui.html("sort by <i>k<sub>clv</sub></i>")
+                ui.html("sort by <i>p<sub>clv</sub></i>")
             sorted_kclv = False
 
     sort_button.on_click(handle_sort_click)
@@ -561,6 +581,7 @@ def show_output(output_container, get_input_values: callable):
 
         try:
             k_on_ref = 1E-2
+            concentration = 100
             binding_rate = k_on_ref * concentration
 
             # Clear previous output content - [IMPORTANT], otherwise plots will stack below on each request
@@ -624,7 +645,7 @@ def show_output(output_container, get_input_values: callable):
                         ax1.set_ylabel("fraction cleaved $f_{clv}$")
 
                         ax1.set_facecolor('#ECF0F1')
-                        ax1.set_title("cleavage vs time")
+                        ax1.set_title("cleavage vs time (100 nM)")
 
                         # FIGURE 2 - Cleavage rate vs concentration
                         ax2 = fig1.add_subplot(spec0[1, 1])
