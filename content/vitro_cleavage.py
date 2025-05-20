@@ -153,47 +153,43 @@ def show_input():
                     upload_component.reset(),
                     upload_component.run_method('pickFiles')
                 )).props('outline no-caps').style(f'font-size: {fsz}pt')
-                
-        # CONCENTRATION
-        with ui.element().classes('w-full h-full p-0'):
-            with ui.row(align_items='start').classes(f'w-[{wc1 - 20}px] gap-0'):
-                ui.markdown('**RNP concentration**').classes('leading-[1.7]').style(f'font-size: {fsz}pt')
-                ui.space()
-                rnp_concentration_input = (
-                    ui.input(placeholder='100',
-                             validation=concentration_validation,
-                             value=(100 if initial_input else None))
-                    .props('dense suffix="nM"')
-                    .classes('w-[70px]')
-                    .style(f'font-size: {fsz}pt')
-                )
 
-        ui.element()
 
-        # PARAMETER SELECTION
-        with ui.row(align_items='center').classes('w-full p-0'):
-            ui.markdown('**Model parameters**').classes('leading-[0.7]').style(f'font-size: {fsz}pt')
-            (ui.icon('info')
-             .tooltip('Select the model for cleavage predictions.')
-             .style(f'font-size: {fsz}pt'))
-        ui.element()
+        with ui.column(align_items='start').classes(f'w-[{wc1 - 20}px] p-0 m-0 gap-0'):
 
-        with ui.column().classes('w-full h-full p-0'):
+            # CONTEXT
+            with ui.row(align_items='center').classes('w-full p-0'):
+                ui.markdown('**Context**').classes('leading-[0]').style(f'font-size: {fsz}pt')
+                (ui.icon('info')
+                 .tooltip('Select the application context.')
+                 .style(f'font-size: {fsz}pt'))
+            context_dropdown = ui.select(
+                options={'invitro': 'cell-free (in vitro)',
+                         'ecoli': 'E. coli',
+                         'mammal': 'mammal',},
+                value='invitro',
+            ).props('dense').classes(f'w-full p-0 m-0').style(f'font-size: {fsz}pt')
+            ui.element().classes("h-3")
+
+            # PARAMETER SELECTION
+            with ui.row(align_items='center').classes('w-full p-0'):
+                ui.markdown('**Landscape parameters**').classes('leading-[0]').style(f'font-size: {fsz}pt')
+                (ui.icon('info')
+                 .tooltip('Select the model for cleavage predictions.')
+                 .style(f'font-size: {fsz}pt'))
             model_dropdown = ui.select(
                 options={
-                    'sequence_params': 'sequence-params (default)',
-                    'average_params': 'average-params',
-                    'average_params_legacy': 'average-params-legacy'
+                    'sequence_params': 'sequence (default)',
+                    'average_params': 'average',
+                    'average_params_legacy': 'average (legacy)'
                 },
                 value='sequence_params',
-            ).props('dense').classes(f'w-[{wc1 - 20}px] p-0 m-0').style(f'font-size: {fsz}pt')
+            ).props('dense').classes(f'w-full p-0 m-0').style(f'font-size: {fsz}pt')
+            ui.element().classes("h-6")
 
-        with ui.row(align_items='center').classes('h-full w-full p-0'):
-            (ui.button(icon='search')
-             .classes('h-4 w-4').style('font-size: 12px').props('outline'))
-
-        ui.element().classes("h-6")
-        ui.element()
+        with ui.column(align_items='center'):
+            with ui.row(align_items='center').classes('h-full w-full p-0'):
+                (ui.button('show').style(f'font-size: {fsz}pt').props('outline no-caps'))
 
         submit_button = (
             ui.button('Submit')
@@ -203,26 +199,15 @@ def show_input():
         )
 
     def get_input_values():
-
         ontarget = process_ontarget_input(
             target_sequence_input.value,
             target_input_select.value
         )
 
-		# Validate concentration input
-        concentration = rnp_concentration_input.value
-        concentration_error = concentration_validation(concentration)
-        if concentration_error:
-            message = "RNP concentration cannot be empty and has to be a valid number. Default value is 100."
-            ui.notify(f'Error: {message}', type='negative')
-            return  # Stop further processing if there's an error
-        else:
-            concentration = float(concentration)
-
         input_vals = {
             'on_target': ontarget,
             'off_targets': process_offtarget_input(off_targets_input.value),
-            'concentration': float(rnp_concentration_input.value),
+            'context': context_dropdown.value,
             'parameter_set': model_dropdown.value
         }
         return input_vals
@@ -231,22 +216,51 @@ def show_input():
     return submit_button, get_input_values, model_dropdown
 
 
+def get_k_on_off(context):
+    if context == 'invitro':
+        k_on = 0.1
+        k_off = 1.0
+    elif context == 'ecoli':
+        # E. coli volume:      1 µm³ = 1 fL
+        # no. of PAMs:         1E6 (500k / genome, 2 genomes)
+        # PAM-binding rate:   60 s⁻¹
+        # PAM-unbinding rate: 40 s⁻¹
+        k_on = 6.02E23 * 1E-9 * 1E-15 / 1E6 / (1 / 60 + 1 / 40)
+        k_off = 40
+    elif context == 'mammal':
+        # mammal nuclear volume: 500 µm³ = 500 fL
+        # no. of PAMs:          13E6 (320 mln / genome, 2 genomes, 2% available)
+        # PAM-binding rate:     1.33 s⁻¹
+        # PAM-unbinding rate:     40 s⁻¹
+        k_on = 6.02E23 * 1E-9 * 500E-15 / 13E6 / (1 / 1.33 + 1 / 40)
+        k_off = 40
+    else:
+        raise ValueError(f"Unknown context '{context}'")
+    return k_on, k_off
+
+
 def show_output(output_container, get_input_values: callable):
 
     # PROCESSING USER INPUT
-    def make_stc_list(protospacer, off_targets, parameter_set):
+    def make_stc_list(protospacer, off_targets, context, parameter_set):
         """Generate SearcherTargetComplexes."""
+
+        k_on, k_off = get_k_on_off(context)
+
         if parameter_set == 'sequence_params':
             bare_protein = crisprzip.kinetics.load_landscape(parameter_set)
+            bare_protein.internal_rates['k_off'] = k_off
             guided_protein = bare_protein.bind_guide_rna(protospacer=protospacer)
 
             targets = [protospacer] + off_targets
             protein_sequence_complexes = [guided_protein.probe_sequence(target_seq)
                                           for target_seq in targets]
             return protein_sequence_complexes
+
         elif (parameter_set == 'average_params') or (parameter_set == 'average_params_legacy'):
             protein = crisprzip.kinetics.load_landscape(parameter_set)
-            
+            protein.internal_rates['k_off'] = k_off
+
             targets = [protospacer] + off_targets
             protein_sequence_complexes = []
             for target_seq in targets:
@@ -286,7 +300,7 @@ def show_output(output_container, get_input_values: callable):
         ]
         return k_fit_values
 
-    protospacer, off_targets, concentration, parameter_set = get_input_values().values()
+    protospacer, off_targets, context, parameter_set = get_input_values().values()
 
     if len(off_targets) > 250:
         ui.notify(f"Can't process {len(off_targets)} off-targets at once! (max. 250)", type='warning')
@@ -297,12 +311,18 @@ def show_output(output_container, get_input_values: callable):
         off_targets=off_targets,
         parameter_set=parameter_set,
     )
-    cleavage_rates = get_all_cleavage_rates(
+    cleavage_probs = get_all_cleavage_probs(
         protospacer=protospacer,
         off_targets=off_targets,
+        context=context,
         parameter_set=parameter_set,
-        concentration=concentration,
     )
+    # cleavage_rates = get_all_cleavage_rates(
+    #     protospacer=protospacer,
+    #     off_targets=off_targets,
+    #     parameter_set=parameter_set,
+    #     concentration=concentration,
+    # )
 
     targets = [protospacer] + off_targets
     values = cleavage_rates
