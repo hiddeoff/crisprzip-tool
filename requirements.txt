@@ -1,6 +1,6 @@
-crisprzip==1.1.0
+crisprzip>=1.1.1
 matplotlib
-nicegui
+nicegui>=2.17.0
 numpy
 pandas
 plotly
