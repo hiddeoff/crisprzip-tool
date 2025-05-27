@@ -22,21 +22,20 @@ def show_input():
         target_sequence_input.props(f'placeholder={placeholder}')
         target_sequence_input.update()
 
-
-    # def check_sequence_input(sequence):
-    #     if len(sequence) != 23:
-    #         raise ValueError(f"Your input of length {len(sequence)} does not "
-    #                          f"follow the required format 5'-target-PAM-3' "
-    #                          f"(23 nts total).")
-    #     if sequence[-2:] != "GG":
-    #         raise ValueError(
-    #             f"Currently, the non-canonical PAM '{sequence[-3:]}' "
-    #             f"is not supported. Please provide a target with a "
-    #             f"canonical 'NGG' PAM.")
-    #     for nt in sequence:
-    #         if nt not in ["A", "C", "G", "T"]:
-    #             raise ValueError(f"Nucleotide '{nt}' could not be recognized. "
-    #                              f"Please specify A, C, G or T.")
+    def check_sequence_input(sequence):
+        if len(sequence) != 23:
+            raise ValueError(f"Your input of length {len(sequence)} does not "
+                             f"follow the required format 5'-target-PAM-3' "
+                             f"(23 nts total).")
+        if sequence[-2:] != "GG":
+            raise ValueError(
+                f"Currently, the non-canonical PAM '{sequence[-3:]}' "
+                f"is not supported. Please provide a target with a "
+                f"canonical 'NGG' PAM.")
+        for nt in sequence:
+            if nt not in ["A", "C", "G", "T"]:
+                raise ValueError(f"Nucleotide '{nt}' could not be recognized. "
+                                 f"Please specify A, C, G or T.")
 
     def handle_offtarget_uploads(e: events.UploadEventArguments):
         try:
@@ -245,14 +244,31 @@ def show_input():
         )
 
     def get_input_values():
+
         ontarget = process_ontarget_input(
             target_sequence_input.value,
             target_input_select.value
         )
+        try:
+            check_sequence_input(
+                ontarget if target_input_select == "protospacer"
+                else ontarget[:-3] + "GGG"  # prevents errors due to NGG PAM
+            )
+        except Exception as e:
+            ui.notify(str(e), type='negative')
+            return
+
+        off_targets = process_offtarget_input(off_targets_input.value)
+        for sequence in off_targets:
+            try:
+                check_sequence_input(sequence)
+            except Exception as e:
+                ui.notify(str(e), type='negative')
+                return
 
         input_vals = {
             'on_target': ontarget,
-            'off_targets': process_offtarget_input(off_targets_input.value),
+            'off_targets': off_targets,
             'context': context_dropdown.value,
             'parameter_set': model_dropdown.value
         }
