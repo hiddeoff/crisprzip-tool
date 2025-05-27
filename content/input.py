@@ -6,7 +6,7 @@ import pandas as pd
 
 from crisprzip import *
 from crisprzip.kinetics import *
-
+from pandas.core.internals.blocks import check_ndim
 
 initial_input = True  # auto-fills upon load - useful when developing
 
@@ -21,21 +21,6 @@ def show_input():
             placeholder = 'GACGCAUAAAGAUGAGACGC'
         target_sequence_input.props(f'placeholder={placeholder}')
         target_sequence_input.update()
-
-    def check_sequence_input(sequence):
-        if len(sequence) != 23:
-            raise ValueError(f"Your input of length {len(sequence)} does not "
-                             f"follow the required format 5'-target-PAM-3' "
-                             f"(23 nts total).")
-        if sequence[-2:] != "GG":
-            raise ValueError(
-                f"Currently, the non-canonical PAM '{sequence[-3:]}' "
-                f"is not supported. Please provide a target with a "
-                f"canonical 'NGG' PAM.")
-        for nt in sequence:
-            if nt not in ["A", "C", "G", "T"]:
-                raise ValueError(f"Nucleotide '{nt}' could not be recognized. "
-                                 f"Please specify A, C, G or T.")
 
     def handle_offtarget_uploads(e: events.UploadEventArguments):
         try:
@@ -83,9 +68,11 @@ def show_input():
             if length is not None and len(input.strip()) > 0:
                 input_length = len(input.strip())
                 if input_length < length:
-                    return f"Too short ({input_length}/{length})"
+                    return f"Too short: {input_length}/{length}"
                 elif input_length > length:
-                    return f"Too long ({input_length}/{length})"
+                    return f"Too long: {input_length}/{length}"
+                if input[-2:] != "GG":
+                    return f"Only canonical PAMs \'NGG\'"
 
         elif input_type == "guide RNA":
             length = 20
@@ -100,9 +87,11 @@ def show_input():
                     return f"Too long ({input_length}/{length})"
 
         elif input_type == "offtargets":
-            pattern = r'^[ACGTacgt\,\n\s]*$'
-            if not (re.fullmatch(pattern, input)):
-                return "Only ACGT nucleotides"
+            off_targets = process_offtarget_input(input)
+            for i, seq in enumerate(off_targets):
+                output = sequence_validation(seq, "protospacer")
+                if output is not None:
+                    return f"{output} (target #{i + 1})"
 
 
     wc1 = 250  # column 1 width
@@ -237,26 +226,25 @@ def show_input():
 
     def get_input_values():
 
+        # check for valid target sequence
+        err_msg = sequence_validation(input=target_sequence_input.value,
+                                      input_type=target_input_select.value)
+        if err_msg:
+            ui.notify(f"Target sequence error: {err_msg}", type='negative')
+            return
+
+        # check for valid off-target sequences
+        err_msg = sequence_validation(input=off_targets_input.value,
+                                      input_type="offtargets")
+        if err_msg:
+            ui.notify(f"Off-target sequence error: {err_msg}", type='negative')
+            return
+
         ontarget = process_ontarget_input(
             target_sequence_input.value,
             target_input_select.value
         )
-        try:
-            check_sequence_input(
-                ontarget if target_input_select == "protospacer"
-                else ontarget[:-3] + "GGG"  # prevents errors due to NGG PAM
-            )
-        except Exception as e:
-            ui.notify(str(e), type='negative')
-            return
-
         off_targets = process_offtarget_input(off_targets_input.value)
-        for sequence in off_targets:
-            try:
-                check_sequence_input(sequence)
-            except Exception as e:
-                ui.notify(str(e), type='negative')
-                return
 
         input_vals = {
             'on_target': ontarget,
