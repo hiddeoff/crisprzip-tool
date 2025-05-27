@@ -19,7 +19,7 @@ def index():
 
     # FOOTER
     with ui.footer(elevated=True).classes('py-1 h-10 bg-[#F5FAF4] flex items-center'):
-        ui.markdown('CRISPRzip GUI is created with [niceGUI](https://nicegui.io). Licensed under MIT.').style('color: gray; font-size: 10px;')
+        ui.markdown('CRISPRzip tool is created with [NiceGUI](https://nicegui.io). Licensed under MIT.').style('color: gray; font-size: 10px;')
 
     with ui.tab_panels(tabs, value=one).classes('w-full'):
 
