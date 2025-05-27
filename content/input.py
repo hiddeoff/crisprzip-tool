@@ -105,14 +105,6 @@ def show_input():
                 return "Only ACGT nucleotides"
 
 
-    def concentration_validation(input) -> str | None:
-        concentration = str(input)
-        if not concentration.strip():
-            return "RNP concentration cannot be empty."
-        if not re.fullmatch(r"^\d*(\.\d*)?([eE][+-]?\d+)?$", concentration):
-            return "Please enter a valid number."
-        return None  # Return None if the input is valid
-
     wc1 = 250  # column 1 width
     wc2 = 100  # column 2 width
     fsz = 10  # font size (in pt)
