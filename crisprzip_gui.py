@@ -8,15 +8,12 @@ def index():
 
     # HEADER
     with ui.header(elevated=True).style('background-color: #F5F9FF'):
-        with ui.row().classes():
-            ui.space()
-            ui.image('./img/CRISPRzip_logo_no_background.png').props('width=70px height=70px')
-
         with ui.tabs().style('color: gray') as tabs:
             one = ui.tab('cleavage', icon='content_cut')
             two = ui.tab('binding', icon='link')
         ui.space()
-        ui.label('CRISPRzip GUI').style('color: gray; font-size: 40px; font-family: Helvetica Neue; font-weight: 300;')
+        ui.image('./img/CRISPRzip_logo_no_background.png').props('width=70px height=70px')
+        ui.label('CRISPRzip tool').style('color: gray; font-size: 40px; font-family: Helvetica Neue; font-weight: 300;')
         ui.space()
         ui.space()
 
