@@ -19,20 +19,20 @@ def show_input():
             target_sequence_input.placeholder = 'GACGCAUAAAGAUGAGACGC'
         target_sequence_input.update()  # Refresh the input to apply changes
 
-    def check_sequence_input(sequence):
-        if len(sequence) != 23:
-            raise ValueError(f"Your input of length {len(sequence)} does not "
-                             f"follow the required format 5'-target-PAM-3' "
-                             f"(23 nts total).")
-        if sequence[-2:] != "GG":
-            raise ValueError(
-                f"Currently, the non-canonical PAM '{sequence[-3:]}' "
-                f"is not supported. Please provide a target with a "
-                f"canonical 'NGG' PAM.")
-        for nt in sequence:
-            if nt not in ["A", "C", "G", "T"]:
-                raise ValueError(f"Nucleotide '{nt}' could not be recognized. "
-                                 f"Please specify A, C, G or T.")
+    # def check_sequence_input(sequence):
+    #     if len(sequence) != 23:
+    #         raise ValueError(f"Your input of length {len(sequence)} does not "
+    #                          f"follow the required format 5'-target-PAM-3' "
+    #                          f"(23 nts total).")
+    #     if sequence[-2:] != "GG":
+    #         raise ValueError(
+    #             f"Currently, the non-canonical PAM '{sequence[-3:]}' "
+    #             f"is not supported. Please provide a target with a "
+    #             f"canonical 'NGG' PAM.")
+    #     for nt in sequence:
+    #         if nt not in ["A", "C", "G", "T"]:
+    #             raise ValueError(f"Nucleotide '{nt}' could not be recognized. "
+    #                              f"Please specify A, C, G or T.")
 
     def handle_offtarget_uploads(e: events.UploadEventArguments):
         try:
@@ -70,16 +70,37 @@ def show_input():
                 off_targets.append(seq.strip())
         return off_targets
 
-    def sequence_validation(input, length=None) -> str:
-        pattern = r'^[ACGTacgt\,\n\s]*$'
-        if not (re.fullmatch(pattern, input)):
-            return "Only ACGT nucleotides"
-        if length is not None and len(input.strip()) > 0:
-            input_length = len(input.strip())
-            if input_length < length:
-                return f"Too short ({input_length}/{length})"
-            elif input_length > length:
-                return f"Too long ({input_length}/{length})"
+    def sequence_validation(input, input_type=None) -> str:
+
+        if input_type == "protospacer":
+            length = 23
+            pattern = r'^[ACGTacgt\,\n\s]*$'
+            if not (re.fullmatch(pattern, input)):
+                return "Only ACGT nucleotides"
+            if length is not None and len(input.strip()) > 0:
+                input_length = len(input.strip())
+                if input_length < length:
+                    return f"Too short ({input_length}/{length})"
+                elif input_length > length:
+                    return f"Too long ({input_length}/{length})"
+
+        elif input_type == "guide RNA":
+            length = 20
+            pattern = r'^[ACGUacgu\,\n\s]*$'
+            if not (re.fullmatch(pattern, input)):
+                return "Only ACGU nucleotides"
+            if length is not None and len(input.strip()) > 0:
+                input_length = len(input.strip())
+                if input_length < length:
+                    return f"Too short ({input_length}/{length})"
+                elif input_length > length:
+                    return f"Too long ({input_length}/{length})"
+
+        elif input_type == "offtargets":
+            pattern = r'^[ACGTacgt\,\n\s]*$'
+            if not (re.fullmatch(pattern, input)):
+                return "Only ACGT nucleotides"
+
 
     def concentration_validation(input) -> str | None:
         concentration = str(input)
@@ -109,13 +130,17 @@ def show_input():
         ui.element()
 
         with ui.column().classes('w-full p-0'):
-            target_sequence_input = ui.input(
-                validation=lambda x: sequence_validation(x, 23),
-                # once the update_placeholder() function works, this arg should be omitted
-                placeholder='GACGCATAAAGATGAGACGCTGG',
-                value=('GACGCATAAAGATGAGACGCTGG' if initial_input else None),
-            ).classes(f'w-[{wc1 - 20}px] font-mono').props('dense').style(
-                f'font-size: {fsz}pt')
+            target_sequence_input = (
+                ui.input(
+                    validation=lambda x: sequence_validation(x, input_type=target_input_select.value),
+                    # once the update_placeholder() function works, this arg should be omitted
+                    placeholder='GACGCATAAAGATGAGACGCTGG',
+                    value=('GACGCATAAAGATGAGACGCTGG' if initial_input else None),
+                )
+                .classes(f'w-[{wc1 - 20}px] font-mono')
+                .props('dense')
+                .style(f'font-size: {fsz}pt')
+            )
 
         with ui.column().classes('w-full p-0'):
             target_input_select = (
@@ -139,7 +164,7 @@ def show_input():
         with ui.column().classes('w-full h-full p-0'):
             off_targets_input = ui.textarea(
                 placeholder='GACGCATAAAGATGAGACGCTGG,\nGACGCATAAAGATGAGACGCTGG,\n...',
-                validation=lambda x: sequence_validation(x, None),
+                validation=lambda x: sequence_validation(x, input_type="offtargets"),
                 value=(('GACGAACAAAGATGAGACGCTGG,\n' +
                         'GACGCATATATACGAGACGCTGG,\n' +
                         'GACGCATAATTATGAGTCGCTGG,\n' +
