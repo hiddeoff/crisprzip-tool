@@ -59,36 +59,36 @@ def show_input():
                 off_targets.append(seq.strip())
         return off_targets
 
-    def sequence_validation(input, input_type=None) -> str:
+    def sequence_validation(in_str, input_type=None) -> str:
 
         if input_type == "protospacer":
             length = 23
             pattern = r'^[ACGTacgt\,\n\s]*$'
-            if not (re.fullmatch(pattern, input)):
+            if not (re.fullmatch(pattern, in_str)):
                 return "Only ACGT nucleotides"
-            if length is not None and len(input.strip()) > 0:
-                input_length = len(input.strip())
+            if length is not None and len(in_str.strip()) > 0:
+                input_length = len(in_str.strip())
                 if input_length < length:
                     return f"Too short: {input_length}/{length}"
                 elif input_length > length:
                     return f"Too long: {input_length}/{length}"
-                if input[-2:] != "GG":
+                if in_str[-2:] != "GG":
                     return f"Only canonical PAMs \'NGG\'"
 
         elif input_type == "guide RNA":
             length = 20
             pattern = r'^[ACGUacgu\,\n\s]*$'
-            if not (re.fullmatch(pattern, input)):
+            if not (re.fullmatch(pattern, in_str)):
                 return "Only ACGU nucleotides"
-            if length is not None and len(input.strip()) > 0:
-                input_length = len(input.strip())
+            if length is not None and len(in_str.strip()) > 0:
+                input_length = len(in_str.strip())
                 if input_length < length:
                     return f"Too short ({input_length}/{length})"
                 elif input_length > length:
                     return f"Too long ({input_length}/{length})"
 
         elif input_type == "offtargets":
-            off_targets = process_offtarget_input(input)
+            off_targets = process_offtarget_input(in_str)
             for i, seq in enumerate(off_targets):
                 output = sequence_validation(seq, "protospacer")
                 if output is not None:
@@ -150,7 +150,7 @@ def show_input():
             off_targets_input = ui.textarea(
                 placeholder='GACGCATAAAGATGAGACGCTGG,\nGACGCATAAAGATGAGACGCTGG,\n...',
                 validation=lambda x: sequence_validation(x, input_type="offtargets"),
-                value=(('GACGAACAAAGATGAGACGCTGG,\n' +
+                value=(str('GACGAACAAAGATGAGACGCTGG,\n' +
                         'GACGCATATATACGAGACGCTGG,\n' +
                         'GACGCATAATTATGAGTCGCTGG,\n' +
                         'GACGCATACCGATGTGTCGCTGG,\n' +
@@ -345,14 +345,14 @@ def show_input():
     def get_input_values():
 
         # check for valid target sequence
-        err_msg = sequence_validation(input=target_sequence_input.value,
+        err_msg = sequence_validation(in_str=target_sequence_input.value,
                                       input_type=target_input_select.value)
         if err_msg:
             ui.notify(f"Target sequence error: {err_msg}", type='negative')
             return
 
         # check for valid off-target sequences
-        err_msg = sequence_validation(input=off_targets_input.value,
+        err_msg = sequence_validation(in_str=off_targets_input.value,
                                       input_type="offtargets")
         if err_msg:
             ui.notify(f"Off-target sequence error: {err_msg}", type='negative')

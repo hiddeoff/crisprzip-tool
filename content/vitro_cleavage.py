@@ -1,15 +1,11 @@
-import re
-from io import StringIO
-
-from nicegui import ui, events
+from nicegui import ui
 from scipy.optimize import curve_fit
 import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-from crisprzip import *
 from crisprzip.kinetics import *
-from .input import show_input, get_k_on_off, make_stc_list
+from .input import show_input, make_stc_list
 
 
 def get_cleavage_prob(stc):

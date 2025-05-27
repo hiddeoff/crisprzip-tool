@@ -1,16 +1,12 @@
-import re
-from io import StringIO
-
-import numpy as np
-from nicegui import ui, events
+from nicegui import ui
 from scipy.optimize import curve_fit
 import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-from crisprzip import *
 from crisprzip.kinetics import *
 from .input import show_input, get_k_on_off, make_stc_list
+
 
 def get_effective_stab(stc):
     landscape = stc.off_target_landscape
