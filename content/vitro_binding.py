@@ -170,7 +170,7 @@ def show_output(output_container, get_input_values: callable):
                 ui.icon('info').tooltip(
                     'Select up to 9 rows with checkboxes or Ctrl/Shift to inspect their'
                     'hybridization landscape, cleavage dynamics and concentration dependence.'
-                )
+                ).style(f'font-size: 12pt')
                 ui.space()
                 sort_button = ui.button().props('no-caps').classes("w-[120px]")
                 with sort_button:

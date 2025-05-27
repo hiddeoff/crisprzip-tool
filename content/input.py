@@ -11,6 +11,9 @@ from crisprzip.kinetics import *
 initial_input = True  # auto-fills upon load - useful when developing
 
 
+initial_input = True  # auto-fills upon load - useful when developing
+
+
 def show_input():
     def update_placeholder(value):
         if value == 'protospacer':
@@ -92,6 +95,7 @@ def show_input():
     wc1 = 230  # column 1 width
     wc2 = 100  # column 2 width
     fsz = 10  # font size (in pt)
+    fsi = 12   # font size for information bubble (in pt)
 
     # CONTENT
     with ui.grid(columns=2).style(
@@ -103,7 +107,7 @@ def show_input():
                 'p-0 leading-[0.7]').style(f'font-size: {fsz}pt')
             ui.icon('info').tooltip(
                 'Select the model for cleavage predictions. Recommended: sequence-params2.').style(
-                f'font-size: {fsz}pt')
+                f'font-size: {fsi}pt')
         ui.element()
 
         with ui.column().classes('w-full p-0'):
@@ -130,7 +134,7 @@ def show_input():
                 'p-0 leading-[0.7]').style(f'font-size: {fsz}pt')
             ui.icon('info').tooltip(
                 'Select the model for cleavage predictions. Recommended: sequence-params2.').style(
-                f'font-size: {fsz}pt')
+                f'font-size: {fsi}pt')
         ui.element()
 
         with ui.column().classes('w-full h-full p-0'):
@@ -170,7 +174,7 @@ def show_input():
                     f'font-size: {fsz}pt')
                 (ui.icon('info')
                  .tooltip('Select the application context.')
-                 .style(f'font-size: {fsz}pt'))
+                 .style(f'font-size: {fsi}pt'))
             context_dropdown = ui.select(
                 options={'invitro': 'cell-free (in vitro)',
                          'ecoli': 'E. coli',
@@ -186,7 +190,7 @@ def show_input():
                     'leading-[0]').style(f'font-size: {fsz}pt')
                 (ui.icon('info')
                  .tooltip('Select the model for cleavage predictions.')
-                 .style(f'font-size: {fsz}pt'))
+                 .style(f'font-size: {fsi}pt'))
             model_dropdown = ui.select(
                 options={
                     'sequence_params': 'sequence (default)',
