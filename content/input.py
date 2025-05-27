@@ -93,6 +93,12 @@ def show_input():
                 if output is not None:
                     return f"{output} (target #{i + 1})"
 
+    def plot_parameter_values():
+        pass
+
+    def show_button_handler():
+        ui.dialog()
+
 
     wc1 = 250  # column 1 width
     wc2 = 100  # column 2 width
