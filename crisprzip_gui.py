@@ -13,7 +13,7 @@ def index():
             two = ui.tab('binding', icon='link')
         ui.space()
         ui.image('./img/CRISPRzip_logo_no_background.png').props('width=70px height=70px')
-        ui.label('CRISPRzip tool').style('color: gray; font-size: 40px; font-family: Helvetica; font-weight: 300;')
+        ui.label('CRISPRzip tool').style('color: gray; font-size: 40px; font-family: Helvetica Neue, Roboto, Inter, sans-serif; font-weight: 100;')
         ui.space()
         ui.space()
 
