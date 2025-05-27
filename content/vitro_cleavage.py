@@ -189,7 +189,6 @@ def show_output(output_container, get_input_values: callable):
                 t_ax = tfig.gca()
                 t_ax.text(.5, .5, r"cleavage probability $p_{clv}$",
                           va='center', ha='center', fontsize='large')
-                tfig.tight_layout()
                 t_ax.set_axis_off()
 
             with ui.row().classes('gap-0 p-0'):
@@ -225,7 +224,6 @@ def show_output(output_container, get_input_values: callable):
                     ax0.set_yscale('log')
                     ax0.set_yticks(ax.get_yticks())
                     ax0.set_ylim(*ax.get_ylim())
-                    ax0.set_xlim(0, 0)
                     ax0.get_xaxis().set_visible(False)
                     fig0.subplots_adjust(left=.99, right=1., bottom=.15, top=.95)
 
