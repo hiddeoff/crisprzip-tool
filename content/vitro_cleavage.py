@@ -100,6 +100,7 @@ def show_input():
     wc1 = 230  # column 1 width
     wc2 = 100  # column 2 width
     fsz = 10   # font size (in pt)
+    fsi = 12   # font size for information bubble (in pt)
 
     # CONTENT
     with ui.grid(columns=2).style(f'grid-template-columns: {wc1}px {wc2}px').classes('gap-0'):
@@ -107,7 +108,7 @@ def show_input():
         # TARGET SEQUENCE
         with ui.row(align_items='center').classes('p-0'):
             ui.markdown('**Target sequence**').classes('p-0 leading-[0.7]').style(f'font-size: {fsz}pt')
-            ui.icon('info').tooltip('Select the model for cleavage predictions. Recommended: sequence-params2.').style(f'font-size: {fsz}pt')
+            ui.icon('info').tooltip('Select the model for cleavage predictions. Recommended: sequence-params2.').style(f'font-size: {fsi}pt')
         ui.element()
 
         with ui.column().classes('w-full p-0'):
@@ -130,7 +131,7 @@ def show_input():
         # OFF-TARGET SEQUENCES
         with ui.row(align_items='center').classes('p-0'):
             ui.markdown('**Off-target sequences**').classes('p-0 leading-[0.7]').style(f'font-size: {fsz}pt')
-            ui.icon('info').tooltip('Select the model for cleavage predictions. Recommended: sequence-params2.').style(f'font-size: {fsz}pt')
+            ui.icon('info').tooltip('Select the model for cleavage predictions. Recommended: sequence-params2.').style(f'font-size: {fsi}pt')
         ui.element()
 
         with ui.column().classes('w-full h-full p-0'):
@@ -166,7 +167,7 @@ def show_input():
                 ui.markdown('**Context**').classes('leading-[0]').style(f'font-size: {fsz}pt')
                 (ui.icon('info')
                  .tooltip('Select the application context.')
-                 .style(f'font-size: {fsz}pt'))
+                 .style(f'font-size: {fsi}pt'))
             context_dropdown = ui.select(
                 options={'invitro': 'cell-free (in vitro)',
                          'ecoli': 'E. coli',
@@ -180,7 +181,7 @@ def show_input():
                 ui.markdown('**Landscape parameters**').classes('leading-[0]').style(f'font-size: {fsz}pt')
                 (ui.icon('info')
                  .tooltip('Select the model for cleavage predictions.')
-                 .style(f'font-size: {fsz}pt'))
+                 .style(f'font-size: {fsi}pt'))
             model_dropdown = ui.select(
                 options={
                     'sequence_params': 'sequence (default)',
@@ -436,7 +437,7 @@ def show_output(output_container, get_input_values: callable):
                 ui.icon('info').tooltip(
                     'Select up to 9 rows with checkboxes or Ctrl/Shift to inspect their'
                     'hybridization landscape, cleavage dynamics and concentration dependence.'
-                )
+                ).style(f'font-size: 12pt')
                 ui.space()
                 sort_button = ui.button().props('no-caps').classes("w-[120px]")
                 with sort_button:
