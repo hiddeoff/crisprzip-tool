@@ -113,7 +113,7 @@ def show_input():
             return "Please enter a valid number."
         return None  # Return None if the input is valid
 
-    wc1 = 230  # column 1 width
+    wc1 = 250  # column 1 width
     wc2 = 100  # column 2 width
     fsz = 10  # font size (in pt)
     fsi = 12   # font size for information bubble (in pt)
