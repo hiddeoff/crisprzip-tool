@@ -3,10 +3,11 @@ from io import StringIO
 
 from nicegui import ui, events
 import pandas as pd
+import matplotlib as mpl
+from matplotlib import pyplot as plt
 
 from crisprzip import *
 from crisprzip.kinetics import *
-from pandas.core.internals.blocks import check_ndim
 
 initial_input = True  # auto-fills upon load - useful when developing
 
@@ -92,13 +93,6 @@ def show_input():
                 output = sequence_validation(seq, "protospacer")
                 if output is not None:
                     return f"{output} (target #{i + 1})"
-
-    def plot_parameter_values():
-        pass
-
-    def show_button_handler():
-        ui.dialog()
-
 
     wc1 = 250  # column 1 width
     wc2 = 100  # column 2 width
@@ -220,8 +214,11 @@ def show_input():
 
         with ui.column(align_items='center'):
             with ui.row(align_items='center').classes('h-full w-full p-0'):
-                (ui.button('show').style(f'font-size: {fsz}pt').props(
-                    'outline no-caps'))
+                show_button = (
+                    ui.button('show')
+                    .style(f'font-size: {fsz}pt')
+                    .props('outline no-caps')
+                )
 
         submit_button = (
             ui.button('Submit')
@@ -229,6 +226,117 @@ def show_input():
             .classes(f'w-[{wc1 - 20}px]')
             .style(f'font-size: {fsz}pt')
         )
+
+    with ui.dialog().props('full-width') as parameter_popup, ui.row(), ui.card().classes('w-[850px] mx-auto p-3'):
+        with ui.column(align_items='end').classes('w-full'):
+            (ui.button(icon='close', on_click=parameter_popup.close)
+             .props('outline').classes('w-[40px] h-[40px] m-0'))
+
+        ui.add_css('''
+            .nicegui-scroll-area .q-scrollarea__content {
+                padding: 0;
+            }
+        ''')
+
+        with ui.scroll_area().classes('w-full h-[350px]'):
+            with ui.column(align_items='center').classes('w-full'):
+                parameter_plot_container = ui.element()
+            ui.markdown('''
+                The parameter values that determine the outcomes of a CRISPRzip simulation. In summary,
+                
+                - The **on-target landscape** $U_b$ describes the free energy of Cas9 target recognition on its perfect target;
+                - The **mismatch penalties** $Q_b$ are added to that landscape when a mismatching basepair is encountered;
+                - The **binding rate** $k_\mbox{on}^{1\mbox{ nM}}$ describes the rate at which 1 nM of Cas9 binds PAM sites;
+                - The **unbinding rate** $k_\mbox{off}$ describes the rate at which PAM-bound Cas9 unbinds into solution (set by _context_ choice);
+                - The **forward rate** $k_f$ describes the rate at which the R-loop is extended (set by _context_ choice);
+                - The **cleavage rate** $k_\mbox{clv}$ describes the rate at which both strands are cut upon R-loop completion (b=20).
+            
+                With a sequence-average model ('average' or 'average-legacy'), these parameters fully describe the energy landscape on any
+                _mismatch pattern_, e.g. mismatches at position 3 and 16. With sequence-specific model ('sequence'), the on-target landscape and 
+                mismatch penalties above are only the protein contribution to the total energy, to which the cost of R-loop formation should still
+                be added.
+                
+                For more details, see [Eslami-Mossalam (2022) Nat Comm](https://www.nature.com/articles/s41467-022-28994-2).
+                
+            ''', extras=['latex']
+            )
+
+    mpl.style.use('seaborn-v0_8')
+
+    def plot_parameter_values():
+        plot_size = (800, 250)  # in px
+        dpi = plt.rcParams['figure.dpi']  # pixel in inches
+
+        protein = crisprzip.kinetics.load_landscape(model_dropdown.value)
+        k_on, k_off = get_k_on_off(context_dropdown.value)
+
+        with (ui.matplotlib(figsize=(plot_size[0] / dpi,
+                                     plot_size[1] / dpi))
+                .classes(f'w-[{plot_size[0]}px] h-[{plot_size[1]}px]')
+                .figure) as fig:
+
+            axs = fig.subplots(1, 3, width_ratios=(3, 3, 2))
+            for a in axs:
+                a.set_facecolor('#ECF0F1')
+
+            # on-target landscape
+            axs[0].plot(
+                np.arange(21), np.append(0, protein.on_target_landscape),
+            )
+            y_extent = np.diff(axs[0].get_ylim())
+            axs[0].set_xticks(np.arange(0, 21, 5))
+            axs[0].set_xlabel("R-loop size $b$")
+            axs[0].set_ylabel("free energy $U_b$ ($k_BT$)")
+            axs[0].set_title("(protein) on-target landscape")
+
+            # mismatch penalties
+            axs[1].plot(
+                np.arange(21), np.append(np.nan, protein.mismatch_penalties),
+            )
+            axs[1].set_ylim(0, y_extent)
+            axs[1].set_xticks(np.append(1, np.arange(5, 21, 5)))
+            axs[1].set_xlabel("R-loop size $b$")
+            axs[1].set_ylabel("free energy $Q_b$ ($k_BT$)")
+            axs[1].set_title("(protein) mismatch penalties")
+
+            # rates
+            axs[2].plot(
+                np.arange(4),
+                [k_on,
+                 k_off,
+                 protein.internal_rates['k_f'],
+                 protein.internal_rates['k_clv']],
+                ls='', marker='o', markersize=5
+            )
+            axs[2].set_yscale('log')
+            axs[2].set_xlim(-.5, 3.5)
+            axs[2].set_xticks(
+                np.arange(4),
+                ['$k_{on}^{1\,nM}$',
+                 '$k_{off}$',
+                 '$k_{f}$',
+                 '$k_{clv}$'],
+            )
+            axs[2].set_ylabel("rates $k$ ($s^{-1}$)")
+            axs[2].set_title("rates")
+
+            fig.subplots_adjust(left=0.1, right=.95,
+                                bottom=.2, top=.85,
+                                wspace=.6)
+
+        return fig
+
+    def show_button_handler():
+        parameter_plot_container.clear()
+        try:
+            with parameter_plot_container:
+                plot_parameter_values()
+        except Exception as e:
+            ui.notify(f'Error: {str(e)}', type='negative')
+
+        parameter_popup.open()
+
+    show_button.on_click(show_button_handler)
 
     def get_input_values():
 
