@@ -11,9 +11,6 @@ from crisprzip.kinetics import *
 initial_input = True  # auto-fills upon load - useful when developing
 
 
-initial_input = True  # auto-fills upon load - useful when developing
-
-
 def show_input():
     def update_placeholder(value):
         if value == 'protospacer':
@@ -106,8 +103,9 @@ def show_input():
             ui.markdown('**Target sequence**').classes(
                 'p-0 leading-[0.7]').style(f'font-size: {fsz}pt')
             ui.icon('info').tooltip(
-                'Select the model for cleavage predictions. Recommended: sequence-params2.').style(
-                f'font-size: {fsi}pt')
+                'Sequence of the DNA target/protospacer (5\'-to-3\', '
+                '20 nts + PAM) or the gRNA (5\'-to-3\', 20 nts).'
+            ).style(f'font-size: {fsi}pt')
         ui.element()
 
         with ui.column().classes('w-full p-0'):
@@ -133,8 +131,9 @@ def show_input():
             ui.markdown('**Off-target sequences**').classes(
                 'p-0 leading-[0.7]').style(f'font-size: {fsz}pt')
             ui.icon('info').tooltip(
-                'Select the model for cleavage predictions. Recommended: sequence-params2.').style(
-                f'font-size: {fsi}pt')
+                'Sequences of potential DNA off-targets (5\'-to-3\', '
+                '20 nts + PAM). Optional.'
+            ).style(f'font-size: {fsi}pt')
         ui.element()
 
         with ui.column().classes('w-full h-full p-0'):
@@ -172,9 +171,11 @@ def show_input():
             with ui.row(align_items='center').classes('w-full p-0'):
                 ui.markdown('**Context**').classes('leading-[0]').style(
                     f'font-size: {fsz}pt')
-                (ui.icon('info')
-                 .tooltip('Select the application context.')
-                 .style(f'font-size: {fsi}pt'))
+                (ui.icon('info').tooltip(
+                    'Select the (most similar) application context. This choice '
+                    'determines the binding and unbinding kinetics of Cas9 to '
+                    'DNA. Click on \'show\' to inspect values.'
+                ).style(f'font-size: {fsi}pt'))
             context_dropdown = ui.select(
                 options={'invitro': 'cell-free (in vitro)',
                          'ecoli': 'E. coli',
@@ -189,8 +190,10 @@ def show_input():
                 ui.markdown('**Landscape parameters**').classes(
                     'leading-[0]').style(f'font-size: {fsz}pt')
                 (ui.icon('info')
-                 .tooltip('Select the model for cleavage predictions.')
-                 .style(f'font-size: {fsi}pt'))
+                 .tooltip(
+                    'Select the set of landscape parameters for CRISPRzip. Click on '
+                    '\'show\' to inspect values.'
+                ).style(f'font-size: {fsi}pt'))
             model_dropdown = ui.select(
                 options={
                     'sequence_params': 'sequence (default)',

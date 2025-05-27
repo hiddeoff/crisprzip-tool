@@ -168,7 +168,7 @@ def show_output(output_container, get_input_values: callable):
                 show_button = ui.button("SHOW").classes('w-[100px]')
 
                 ui.icon('info').tooltip(
-                    'Select up to 9 rows with checkboxes or Ctrl/Shift to inspect their'
+                    'Select up to 9 rows with checkboxes or Ctrl/Shift to inspect their '
                     'hybridization landscape, cleavage dynamics and concentration dependence.'
                 ).style(f'font-size: 12pt')
                 ui.space()
