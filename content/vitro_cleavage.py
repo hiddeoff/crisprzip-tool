@@ -102,7 +102,7 @@ def show_output(output_container, get_input_values: callable):
     with plot_row:
 
         # Table
-        with ui.column(align_items='center').classes('w-[360px]'):
+        with ui.column(align_items='center').classes('w-[380px]'):
 
             def to_sci_html(val):
                 scistr = f"{val:.2e}"
