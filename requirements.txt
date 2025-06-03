@@ -4,3 +4,4 @@ nicegui>=2.17.0
 numpy
 pandas
 plotly
+latex2mathml

@@ -7,30 +7,44 @@ import content.vitro_binding
 def index():
 
     # HEADER
-    with ui.header(elevated=True).style('background-color: #D9F0D2'):
-        with ui.row().classes():
-            # Image/icon to the left
-            ui.image('./img/CRISPRzip_logo_no_background.png').props('width=50px height=50px')
+    with ui.header(elevated=True).style('background-color: #F5F9FF').classes('p-1'):
+        ui.element().classes('w-[25px]')
+        with ui.row().classes('items-center'):
+            with ui.tabs().style('color: gray') as tabs:
+                one = ui.tab('cleavage', icon='content_cut')
+                two = ui.tab('binding', icon='link')
 
-            # Text next to the image
-            ui.label('CRISPRzip GUI').style('color: black; font-size: 32px; font-family: Courier New; font-weight: bold;')
+        ui.space()
+        
+        with ui.row().classes('absolute-center items-center gap-2'):
+            ui.image('./img/CRISPRzip_logo_no_background.png').props('width=70px height=70px')
+            (ui.label('CRISPRzip tool')
+            .style('color: gray; font-size: 40px; font-weight: 100;'
+                    'font-family: Helvetica Neue, Roboto, Inter, sans-serif;'))
+
+        ui.space()
+
+        with ui.link(target="https://github.com/hiddeoff/crisprzip-model", new_tab=True).style('textDecoration: none'):
+            with ui.column(align_items='center').classes('h-full opacity-60 gap-0 p-0'):
+                (ui.image('https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png')
+                 .props('width=40px height=40px'))
+                ui.html("CRISPRzip").style('color: black').classes('leading-[1.0]')
+                ui.html("on GitHub").style('color: black').classes('leading-[1.0]')
+        ui.element().classes('w-[25px]')
 
     # FOOTER
-    with ui.footer(elevated=True).classes('py-1 h-10 bg-[#D9F0D2] flex items-center'):
-        ui.markdown('CRISPRzip GUI is created with [niceGUI](https://nicegui.io). Licensed under MIT.').style('color: gray; font-size: 10px;')
-
-    # TABS
-    with ui.tabs().classes('w-full bg-gradient-to-b from-white via-white to-[#6ECFF6] rounded-xl') as tabs:
-        one = ui.tab('cleavage', icon='content_cut')
-        two = ui.tab('binding', icon='link')
+    with ui.footer(elevated=True).classes('py-1 h-6 bg-[#F5FAF4] flex items-center'):
+        (ui.markdown('CRISPRzip tool is created with [NiceGUI](https://nicegui.io). Licensed under MIT.')
+         .style('color: gray; font-size: 10px;')
+         .classes('leading-[0.0]'))
 
     with ui.tab_panels(tabs, value=one).classes('w-full'):
 
-        # TAB 1 - IN VITRO
+        # TAB 1 - CLEAVAGE
         with ui.tab_panel(one):
             content.vitro_cleavage.show_contents()  # content/vitro_cleavage.py
 
-        # TAB 2 - IN VIVO
+        # TAB 2 - BINDING
         with ui.tab_panel(two):
             content.vitro_binding.show_contents()  # content/vitro_binding.py
 
