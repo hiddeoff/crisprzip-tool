@@ -15,9 +15,9 @@ def index():
                 two = ui.tab('binding', icon='link')
 
         ui.space()
-        
+
         with ui.row().classes('absolute-center items-center gap-2'):
-            ui.image('./img/CRISPRzip_logo_no_background.png').props('width=70px height=70px')
+            ui.image('./img/CRISPRzip_logo_v0_gradient_nobg.svg').props('width=60px height=60px')
             (ui.label('CRISPRzip tool')
             .style('color: gray; font-size: 40px; font-weight: 100;'
                     'font-family: Helvetica Neue, Roboto, Inter, sans-serif;'))
