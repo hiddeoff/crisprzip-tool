@@ -8,19 +8,19 @@ def index():
 
     # HEADER
     with ui.header(elevated=True).style('background-color: #F5F9FF').classes('p-1'):
-
         ui.element().classes('w-[25px]')
-
-        with ui.tabs().style('color: gray') as tabs:
-            one = ui.tab('cleavage', icon='content_cut')
-            two = ui.tab('binding', icon='link')
+        with ui.row().classes('items-center'):
+            with ui.tabs().style('color: gray') as tabs:
+                one = ui.tab('cleavage', icon='content_cut')
+                two = ui.tab('binding', icon='link')
 
         ui.space()
-
-        ui.image('./img/CRISPRzip_logo_no_background.png').props('width=70px height=70px')
-        (ui.label('CRISPRzip tool')
-         .style('color: gray; font-size: 40px; font-weight: 100;'
-                'font-family: Helvetica Neue, Roboto, Inter, sans-serif;'))
+        
+        with ui.row().classes('absolute-center items-center gap-2'):
+            ui.image('./img/CRISPRzip_logo_no_background.png').props('width=70px height=70px')
+            (ui.label('CRISPRzip tool')
+            .style('color: gray; font-size: 40px; font-weight: 100;'
+                    'font-family: Helvetica Neue, Roboto, Inter, sans-serif;'))
 
         ui.space()
 
@@ -28,9 +28,8 @@ def index():
             with ui.column(align_items='center').classes('h-full opacity-60 gap-0 p-0'):
                 (ui.image('https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png')
                  .props('width=40px height=40px'))
-                ui.html("<i>crisprzip</i>").style('color: black').classes('leading-[1.0]')
+                ui.html("CRISPRzip").style('color: black').classes('leading-[1.0]')
                 ui.html("on GitHub").style('color: black').classes('leading-[1.0]')
-
         ui.element().classes('w-[25px]')
 
     # FOOTER
