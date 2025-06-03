@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+message: "If you are using this software, please cite it as shown below."
+authors:
+- family-names: "Offerhaus"
+  given-names: "Hidde"
+title: "CRISPRzip-tool"
+license: MIT
+url: "https://github.com/hiddeoff/crisprzip-tool"
