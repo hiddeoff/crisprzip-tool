@@ -15,18 +15,23 @@ def index():
                 two = ui.tab('binding', icon='link')
 
         ui.space()
-        
-        with ui.row().classes('absolute-center items-center gap-2'):
-            ui.image('./img/CRISPRzip_logo_no_background.png').props('width=70px height=70px')
+        ui.space()
+        ui.space()
+
+        with ui.row(align_items='center').classes('h-[70px] items-center gap-2'):
+            ui.image('./img/CRISPRzip_logo_v0_gradient_nobg.svg').props('width=60px height=60px')
             (ui.label('CRISPRzip tool')
             .style('color: gray; font-size: 40px; font-weight: 100;'
                     'font-family: Helvetica Neue, Roboto, Inter, sans-serif;'))
 
         ui.space()
+        ui.space()
+        ui.space()
+        ui.space()
 
         with ui.link(target="https://github.com/hiddeoff/crisprzip-model", new_tab=True).style('textDecoration: none'):
             with ui.column(align_items='center').classes('h-full opacity-60 gap-0 p-0'):
-                (ui.image('https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png')
+                (ui.image('https://img.icons8.com/glyph-neue/64/github.png')
                  .props('width=40px height=40px'))
                 ui.html("CRISPRzip").style('color: black').classes('leading-[1.0]')
                 ui.html("on GitHub").style('color: black').classes('leading-[1.0]')
@@ -48,4 +53,7 @@ def index():
         with ui.tab_panel(two):
             content.vitro_binding.show_contents()  # content/vitro_binding.py
 
-ui.run()
+ui.run(
+    title='CRISPRzip tool',
+    favicon="img/CRISPRzip_logo_v0_gradient_nobg.svg"
+)
