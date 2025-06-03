@@ -2,6 +2,10 @@ from nicegui import ui
 import content.vitro_cleavage
 import content.vitro_binding
 
+# macOS packaging support
+from multiprocessing import freeze_support  # noqa
+freeze_support()  # noqa
+
 
 @ui.page('/')
 def index():
@@ -55,5 +59,7 @@ def index():
 
 ui.run(
     title='CRISPRzip tool',
-    favicon="img/CRISPRzip_logo_v0_gradient_nobg.svg"
+    favicon="img/CRISPRzip_logo_v0_gradient_nobg.svg",
+    native=True,
+    reload=False
 )
