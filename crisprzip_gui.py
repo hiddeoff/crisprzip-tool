@@ -53,4 +53,7 @@ def index():
         with ui.tab_panel(two):
             content.vitro_binding.show_contents()  # content/vitro_binding.py
 
-ui.run()
+ui.run(
+    title='CRISPRzip tool',
+    favicon="img/CRISPRzip_logo_v0_gradient_nobg.svg"
+)
