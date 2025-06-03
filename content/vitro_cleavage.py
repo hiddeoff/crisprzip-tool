@@ -297,8 +297,8 @@ def show_output(output_container, get_input_values: callable):
 
         selected_ids = await get_selected_ids()
         if selected_ids:
-            if len(selected_ids) > 9:
-                ui.notify("Select at most 9 targets for inspection.", type='warning')
+            if len(selected_ids) > 6:
+                ui.notify("Select at most 6 targets for inspection.", type='warning')
             else:
                 await plot_selection()
 
