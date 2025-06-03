@@ -15,13 +15,18 @@ def index():
                 two = ui.tab('binding', icon='link')
 
         ui.space()
+        ui.space()
+        ui.space()
 
-        with ui.row().classes('absolute-center items-center gap-2'):
+        with ui.row(align_items='center').classes('h-[70px] items-center gap-2'):
             ui.image('./img/CRISPRzip_logo_v0_gradient_nobg.svg').props('width=60px height=60px')
             (ui.label('CRISPRzip tool')
             .style('color: gray; font-size: 40px; font-weight: 100;'
                     'font-family: Helvetica Neue, Roboto, Inter, sans-serif;'))
 
+        ui.space()
+        ui.space()
+        ui.space()
         ui.space()
 
         with ui.link(target="https://github.com/hiddeoff/crisprzip-model", new_tab=True).style('textDecoration: none'):
