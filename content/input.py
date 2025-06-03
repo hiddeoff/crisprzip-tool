@@ -160,69 +160,78 @@ def show_input():
                 f'w-[{wc1 - 20}px] h-2fr font-mono').style(
                 f'font-size: {fsz}pt')
 
-        with ui.row(align_items='start').classes('w-full h-full p-0'):
-            with ui.row(align_items='center').classes('w-[52px] h-[52px]'):
-                upload_component = ui.upload(
-                    on_upload=handle_offtarget_uploads,
-                    on_rejected=lambda e: ui.notify('File upload failed',
-                                                    type='warning'),
-                    auto_upload=True
-                ).props("accept=.csv hide-upload-btn").classes(
-                    'hidden')  # can add .txt (for example) to .props if you want to uplaod something other than .csv files
-                # add custom ui button (instead of the regular upload button)
-                ui.button('upload', on_click=lambda: (
-                    upload_component.reset(),
-                    upload_component.run_method('pickFiles')
-                )).props('outline no-caps').style(f'font-size: {fsz}pt')
+        with ui.row(align_items='start').classes('w-full h-full p-0 gap-1'):
+            upload_component = (
+                ui.upload(on_upload=handle_offtarget_uploads,
+                          on_rejected=lambda e: ui.notify('File upload failed', type='warning'),
+                          auto_upload=True)
+                .props("accept=.csv hide-upload-btn")  # could accept other files (.txt) too
+                .classes('hidden')
+            )
 
-        with ui.column(align_items='start').classes(
-                f'w-[{wc1 - 20}px] p-0 m-0 gap-0'):
-            # CONTEXT
-            with ui.row(align_items='center').classes('w-full p-0'):
-                ui.markdown('**Context**').classes('leading-[0]').style(
+            ui.element().classes('w-[15px]')
+            (ui.button('upload',
+                       on_click=lambda: (upload_component.reset(),
+                                         upload_component.run_method('pickFiles')))
+             .props('outline no-caps')
+             .style(f'font-size: {fsz}pt')
+             .classes('w-[65px]'))
+
+
+        with ui.row(align_items='start').classes(f'w-[{wc1}px] p-0 m-0 gap-0 no-wrap'):
+            with ui.column(align_items='center').classes(f'w-[{wc1 - 20}px] p-0 m-0 gap-0'):
+
+                # CONTEXT
+                with ui.row(align_items='center').classes('w-full p-0'):
+                    ui.markdown('**Context**').classes('leading-[0]').style(
+                        f'font-size: {fsz}pt')
+                    with ui.icon('info').style(f'font-size: {fsi}pt'):
+                        ui.tooltip(
+                            'Select the (most similar) application context. This choice '
+                            'determines the binding and unbinding kinetics of Cas9 to '
+                            'DNA. Click on \'show\' to inspect values.'
+                        ).style(f'font-size: {fsb}pt')
+                context_dropdown = ui.select(
+                    options={'invitro': 'cell-free (in vitro)',
+                             'ecoli': 'E. coli',
+                             'mammal': 'mammal', },
+                    value='invitro',
+                ).props('dense').classes(f'w-full p-0 m-0').style(
                     f'font-size: {fsz}pt')
-                with ui.icon('info').style(f'font-size: {fsi}pt'):
-                    ui.tooltip(
-                        'Select the (most similar) application context. This choice '
-                        'determines the binding and unbinding kinetics of Cas9 to '
-                        'DNA. Click on \'show\' to inspect values.'
-                    ).style(f'font-size: {fsb}pt')
-            context_dropdown = ui.select(
-                options={'invitro': 'cell-free (in vitro)',
-                         'ecoli': 'E. coli',
-                         'mammal': 'mammal', },
-                value='invitro',
-            ).props('dense').classes(f'w-full p-0 m-0').style(
-                f'font-size: {fsz}pt')
-            ui.element().classes("h-3")
+                ui.element().classes("h-3")
 
-            # PARAMETER SELECTION
-            with ui.row(align_items='center').classes('w-full p-0'):
-                ui.markdown('**Landscape parameters**').classes(
-                    'leading-[0]').style(f'font-size: {fsz}pt')
-                with ui.icon('info').style(f'font-size: {fsi}pt'):
-                    ui.tooltip(
-                        'Select the set of landscape parameters for CRISPRzip. Click on '
-                        '\'show\' to inspect values.'
-                    ).style(f'font-size: {fsb}pt')
-            model_dropdown = ui.select(
-                options={
-                    'sequence_params': 'sequence (default)',
-                    'average_params': 'average',
-                    'average_params_legacy': 'average (legacy)'
-                },
-                value='sequence_params',
-            ).props('dense').classes(f'w-full p-0 m-0').style(
-                f'font-size: {fsz}pt')
-            ui.element().classes("h-6")
+                # PARAMETER SELECTION
+                with ui.row(align_items='center').classes('w-full p-0'):
+                    ui.markdown('**Landscape parameters**').classes(
+                        'leading-[0]').style(f'font-size: {fsz}pt')
+                    with ui.icon('info').style(f'font-size: {fsi}pt'):
+                        ui.tooltip(
+                            'Select the set of landscape parameters for CRISPRzip. Click on '
+                            '\'show\' to inspect values.'
+                        ).style(f'font-size: {fsb}pt')
+                model_dropdown = ui.select(
+                    options={
+                        'sequence_params': 'sequence (default)',
+                        'average_params': 'average',
+                        'average_params_legacy': 'average (legacy)'
+                    },
+                    value='sequence_params',
+                ).props('dense').classes(f'w-full p-0 m-0').style(
+                    f'font-size: {fsz}pt')
+            # ui.image('img/bracket.svg').props('fit=scale-down').classes('h-[125px] w-[15px] p-0 m-0')
 
-        with ui.column(align_items='center'):
-            with ui.row(align_items='center').classes('h-full w-full p-0'):
-                show_button = (
-                    ui.button('show')
-                    .style(f'font-size: {fsz}pt')
-                    .props('outline no-caps')
-                )
+        with ui.row(align_items='center').classes('h-full w-full p-0 gap-1'):
+            ui.image('img/bracket.svg').props('fit=scale-down').classes('h-[125px] w-[15px] p-0 m-0')
+            show_button = (
+                ui.button('show')
+                .style(f'font-size: {fsz}pt')
+                .props('outline no-caps')
+                .classes('w-[65px]')
+            )
+            ui.space()
+
+        ui.element().classes("h-6")
+        ui.element().classes("h-6")
 
         submit_button = (
             ui.button('Submit')
