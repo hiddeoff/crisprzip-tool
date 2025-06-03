@@ -4,7 +4,7 @@
 Welcome to the codebase of the **CRISPRzip tool** from the [Depken Lab](https://depkenlab.tudelft.nl/) at TU
 Delft.
 
-![A screenshot of the CRISPRzip tool in action](img/Screenshot.png)
+![A screenshot of the CRISPRzip tool in action](img/Screenshot_border.png)
 
 ## About the project
 ### The CRISPRzip model
@@ -44,11 +44,16 @@ You can download the latest version of the CRISPRzip tool from the
 Download and launch!
 
 ### Available platforms
-| Platform  | File                                                                                                     |
-|-----------|----------------------------------------------------------------------------------------------------------|
-| Windows   | [crisprzip.exe](https://github.com/hiddeoff/crisprizp-tool/releases/download/latest/crisprzip-tool.exe)  |
-| macOS     | [crisrpzip](https://github.com/hiddeoff/crisprizp-tool/releases/download/latest/crisprzip-tool)          |
-| Linux     | [crisprzip](https://github.com/hiddeoff/crisprizp-tool/releases/downloadlatest/crisprzip-tool)           |
+| Platform      | File                                                                                                        |
+|---------------|-------------------------------------------------------------------------------------------------------------|
+| Windows       | [crisprzip.exe](https://github.com/hiddeoff/crisprizp-tool/releases/download/latest/crisprzip-tool-win.exe) |
+| macOS / Linux | [crisrpzip](https://github.com/hiddeoff/crisprizp-tool/releases/download/latest/crisprzip-tool-unix)        |
+
+### Browser NiceGUI application
+As an alternative to the downloadable applications, you could clone this
+repository and launch CRISPRzip-tool from the terminal. It will open in your
+browser. This way to launch the tool is sometimes (a lot) faster than the 
+executables. Follow the developer instructions below.
 
 ## Developers
 To use and develop the GUI, run the following commands:
@@ -67,9 +72,10 @@ pip install -r requirements.txt
 ```bash
 python crisprzip_gui.py
 ```
+If you would like to build a new executable on your system, navigate to 
+the `bin` folder, where you'll find instructions and commands to build with 
+PyInstaller. 
 
-If you would like to build a new executable on your system, follow the
-building guidelines (_under construction_).
 
 ## Contributing
 If you would like to contribute to this project: that's great! Have a look at our 
