@@ -26,7 +26,7 @@ def index():
 
         with ui.link(target="https://github.com/hiddeoff/crisprzip-model", new_tab=True).style('textDecoration: none'):
             with ui.column(align_items='center').classes('h-full opacity-60 gap-0 p-0'):
-                (ui.image('https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png')
+                (ui.image('https://img.icons8.com/glyph-neue/64/github.png')
                  .props('width=40px height=40px'))
                 ui.html("CRISPRzip").style('color: black').classes('leading-[1.0]')
                 ui.html("on GitHub").style('color: black').classes('leading-[1.0]')
