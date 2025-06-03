@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt
 from crisprzip import *
 from crisprzip.kinetics import *
 
-initial_input = True  # auto-fills upon load - useful when developing
+initial_input = False  # auto-fills upon load - useful when developing
 
 
 def show_input():
