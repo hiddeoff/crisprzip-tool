@@ -1,2 +1,7 @@
-cziptool_venv/
-.idea/
+# macOS
+.DS_Store
+
+# Distribution related
+build/
+dist/
+*.spec
