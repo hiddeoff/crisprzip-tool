@@ -3,8 +3,8 @@ import content.vitro_cleavage
 import content.vitro_binding
 
 # macOS packaging support
-from multiprocessing import freeze_support  # noqa
-freeze_support()  # noqa
+from multiprocessing import freeze_support
+freeze_support()
 
 
 @ui.page('/')
@@ -23,7 +23,7 @@ def index():
         ui.space()
 
         with ui.row(align_items='center').classes('h-[70px] items-center gap-2'):
-            ui.image('./img/CRISPRzip_logo_v0_gradient_nobg.svg').props('width=60px height=60px')
+            ui.image('https://raw.githubusercontent.com/hiddeoff/crisprzip-tool/refs/heads/main/img/CRISPRzip_logo_v0_gradient_nobg.svg').props('width=60px height=60px')
             (ui.label('CRISPRzip tool')
             .style('color: gray; font-size: 40px; font-weight: 100;'
                     'font-family: Helvetica Neue, Roboto, Inter, sans-serif;'))
@@ -58,8 +58,9 @@ def index():
             content.vitro_binding.show_contents()  # content/vitro_binding.py
 
 ui.run(
+    # Uncomment the next two lines if you want to build an executable, or to run in a contained window
+    #native=True,
+    #reload=False,
     title='CRISPRzip tool',
-    favicon="img/CRISPRzip_logo_v0_gradient_nobg.svg",
-    native=True,
-    reload=False
+    favicon="img/CRISPRzip_logo_v0_gradient_nobg.svg"
 )

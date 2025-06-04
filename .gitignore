@@ -1,2 +1,10 @@
-cziptool_venv/
-.idea/
+# Python
+content/__pycache__
+
+# macOS
+.DS_Store
+
+# Distribution related
+build/
+dist/
+*.spec
