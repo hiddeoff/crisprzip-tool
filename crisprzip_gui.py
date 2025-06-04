@@ -1,4 +1,4 @@
-from nicegui import ui
+from nicegui import native,ui
 import content.vitro_cleavage
 import content.vitro_binding
 
