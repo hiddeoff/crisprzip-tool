@@ -23,7 +23,7 @@ def index():
         ui.space()
 
         with ui.row(align_items='center').classes('h-[70px] items-center gap-2'):
-            ui.image('./img/CRISPRzip_logo_v0_gradient_nobg.svg').props('width=60px height=60px')
+            ui.image('https://raw.githubusercontent.com/hiddeoff/crisprzip-tool/refs/heads/main/img/CRISPRzip_logo_v0_gradient_nobg.svg').props('width=60px height=60px')
             (ui.label('CRISPRzip tool')
             .style('color: gray; font-size: 40px; font-weight: 100;'
                     'font-family: Helvetica Neue, Roboto, Inter, sans-serif;'))
