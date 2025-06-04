@@ -75,13 +75,7 @@ python crisprzip_gui.py
 ```
 
 ## Building the executable
-If you want to build the executable for the CRISPRzip tool, you will need to have [PyInstaller](https://pyinstaller.org/en/stable/) installed in addition to the requirements in `requirements.txt`.
-
-You can install it with pip in your virtual environment:
-```bash
-pip install pyinstaller
-```
-Then, you can build the executable by running the following command from the root of the project directory, depending on your platform:
+If you want to build the executable for the CRISPRzip tool, you can build it with [PyInstaller](https://pyinstaller.org/en/stable/). From the root of the project directory, run the following command for your platform:
 
 <details>
   <summary>Windows</summary>
