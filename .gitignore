@@ -1,5 +1,6 @@
 # Python
 content/__pycache__
+crisprzip_venv/
 
 # macOS
 .DS_Store
