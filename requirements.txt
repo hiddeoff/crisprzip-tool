@@ -6,3 +6,5 @@ pandas
 latex2mathml
 pyinstaller 
 pywebview
+PySide6
+qtpy

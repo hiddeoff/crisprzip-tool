@@ -11,4 +11,7 @@ pyinstaller crisprzip_gui.py \
   --collect-all matplotlib \
   --collect-all numpy \
   --collect-all pandas \
-  --hidden-import uvicorn.logging
+  --collect-all qtpy \
+  --hidden-import uvicorn.logging \
+  --hidden-import PySide6.QtWebEngineWidgets \
+  --exclude-module gi --exclude-module PyGObject --exclude-module gtk
