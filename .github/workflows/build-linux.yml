@@ -3,10 +3,12 @@ name: Build Linux Executable (GLIBC Compatible)
 on:
   push:
     branches:
-      - develop-linux # Or your main development branch
+      - develop-linux 
   pull_request:
     branches:
       - main
+  # enable manual triggering from UI
+  workflow_dispatch:
 
 jobs:
   build-linux:
