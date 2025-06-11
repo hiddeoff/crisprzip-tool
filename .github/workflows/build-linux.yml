@@ -12,7 +12,7 @@ on:
 
 jobs:
   build-linux:
-    runs-on: ubuntu-20.04 # Use Ubuntu 20.04 for GLIBC 2.31 compatibility
+    runs-on: ubuntu-22.04 # oldest possible version with GLIBC 2.31 compatibility as of June 2025)
 
     steps:
     - name: Checkout code
