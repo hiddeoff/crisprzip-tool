@@ -72,6 +72,7 @@ jobs:
         --collect-all numpy \
         --collect-all pandas \
         --collect-all qtpy \
+        --collect-all PyQt5 \
         --hidden-import uvicorn.logging \
         --hidden-import PyQt5.QtWebEngineWidgets \
         --exclude-module gi --exclude-module PyGObject --exclude-module gtk
