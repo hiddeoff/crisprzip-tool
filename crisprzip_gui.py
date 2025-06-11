@@ -59,8 +59,8 @@ def index():
 
 ui.run(
     # Uncomment the next two lines if you want to build an executable, or to run in a contained window
-    #native=True,
-    #reload=False,
+    native=True,
+    reload=False,
     title='CRISPRzip tool',
     favicon="img/CRISPRzip_logo_v0_gradient_nobg.svg"
 )
