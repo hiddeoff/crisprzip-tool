@@ -30,10 +30,10 @@ jobs:
         sudo apt install -y \
           libqt5webengine5 \
           libqt5webenginewidgets5 \
-          qtbase5-dev \             # Replaces qt5-default
-          qtchooser \               # Often needed with qtbase5-dev
-          qt5-qmake \               # Often needed with qtbase5-dev
-          qttools5-dev-tools        # Often needed for various Qt build tools
+          qtbase5-dev \
+          qtchooser \
+          qt5-qmake \
+          qttools5-dev-tools
 
     - name: Create and activate Python virtual environment
       run: |
