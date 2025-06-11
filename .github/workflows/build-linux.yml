@@ -1,0 +1,80 @@
+name: Build Linux Executable (GLIBC Compatible)
+
+on:
+  push:
+    branches:
+      - develo-linux # Or your main development branch
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-20.04 # Use Ubuntu 20.04 for GLIBC 2.31 compatibility
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12' 
+        cache: 'pip' # Cache pip dependencies for faster builds
+
+    - name: Install system dependencies for Qt5
+      run: |
+        sudo apt update
+        sudo apt install -y \
+          libqt5webengine5 \
+          libqt5webengine-dev \
+          libqt5webenginewidgets5 \
+          qt5-default
+
+    - name: Create and activate Python virtual environment
+      run: |
+        python -m venv crisprzip_venv
+        source crisprzip_venv/bin/activate
+
+    - name: Install Python dependencies
+      run: |
+        source crisprzip_venv/bin/activate
+        pip install --upgrade pip
+        #pip install -r requirements.txt
+        pip install crisprzip>=1.1.1
+        pip install matplotlib
+        pip install numpy
+        pip install pandas
+        pip install latex2mathml
+        pip install nicegui>=2.17.0
+        pip install pyinstaller 
+        pip install pywebview
+        pip install qtpy
+        pip install PyQt5
+
+    - name: Build with PyInstaller
+      run: |
+        source crisprzip_venv/bin/activate
+        lib_path="./crisprzip_venv/lib/python3.12/"
+        pyinstaller crisprzip_gui.py \
+        --name CRISPRzip \
+        --windowed \
+        --onefile \
+        --add-data "$lib_path/site-packages/nicegui:nicegui/static" \
+        --add-data "$lib_path/site-packages/latex2mathml:latex2mathml" \
+        --collect-all nicegui \
+        --collect-all crisprzip \
+        --collect-all matplotlib \
+        --collect-all numpy \
+        --collect-all pandas \
+        --collect-all qtpy \
+        --hidden-import uvicorn.logging \
+        --hidden-import PyQt5.QtWebEngineWidgets \
+        --exclude-module gi --exclude-module PyGObject --exclude-module gtk
+      working-directory: ./ 
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: CRISPRzip
+        path: dist/CRISPRzip 
