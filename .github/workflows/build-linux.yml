@@ -29,9 +29,7 @@ jobs:
         sudo apt update
         sudo apt install -y \
           libqt5webengine5 \
-          #libqt5webengine-dev \    # trouble maker
           libqt5webenginewidgets5 \
-          #qt5-default \
           qtbase5-dev \             # Replaces qt5-default
           qtchooser \               # Often needed with qtbase5-dev
           qt5-qmake \               # Often needed with qtbase5-dev
