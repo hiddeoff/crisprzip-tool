@@ -55,6 +55,7 @@ jobs:
         pip install pywebview
         pip install qtpy
         pip install PyQt5
+        pip install PyQtWebEngine
 
     - name: Build with PyInstaller
       run: |
@@ -73,6 +74,7 @@ jobs:
         --collect-all pandas \
         --collect-all qtpy \
         --collect-all PyQt5 \
+        --collect-all PyQtWebEngine \
         --hidden-import uvicorn.logging \
         --hidden-import PyQt5.QtWebEngineWidgets \
         --exclude-module gi --exclude-module PyGObject --exclude-module gtk
