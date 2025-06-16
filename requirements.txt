@@ -4,3 +4,7 @@ nicegui>=2.17.0
 numpy
 pandas
 latex2mathml
+pyinstaller 
+pywebview
+PySide6
+qtpy
