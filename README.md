@@ -47,7 +47,8 @@ Download and launch!
 | Platform      | File                                                                                                        |
 |---------------|-------------------------------------------------------------------------------------------------------------|
 | Windows       | [crisprzip.exe](https://github.com/hiddeoff/crisprizp-tool/releases/download/latest/crisprzip-tool-win.exe) |
-| macOS / Linux | [crisrpzip](https://github.com/hiddeoff/crisprizp-tool/releases/download/latest/crisprzip-tool-unix)        |
+| macOS         | [crisrpzip](https://github.com/hiddeoff/crisprizp-tool/releases/download/latest/crisprzip-tool-macos)       |
+| Linux         | [crisrpzip](https://github.com/hiddeoff/crisprizp-tool/releases/download/latest/crisprzip-tool-unix)        |
 
 ### Browser NiceGUI application
 As an alternative to the downloadable applications, you could clone this
@@ -62,7 +63,7 @@ To use and develop the GUI, run the following commands:
 git clone https://github.com/hiddeoff/crisprzip-tool.git
 ```
 2. Navigate to the cloned repository.
-3. Create a venv or conda env, activate it, and install requirements.
+3. Create a virtual environment (venv or conda), activate it, and install the required dependencies.
 ```bash
 conda create -n crisprzip_gui python=3.12
 conda activate crisprzip_gui
@@ -72,10 +73,46 @@ pip install -r requirements.txt
 ```bash
 python crisprzip_gui.py
 ```
-If you would like to build a new executable on your system, navigate to 
-the `bin` folder, where you'll find instructions and commands to build with 
-PyInstaller. 
 
+## Building the executable
+If you want to build the executable for the CRISPRzip tool, you can build it with [PyInstaller](https://pyinstaller.org/en/stable/). From the root of the project directory, run the following command for your platform:
+
+<details>
+  <summary>Windows</summary>
+
+  - **Instructions for Windows**
+
+</details>
+
+<details>
+  <summary>macOS</summary>
+
+```bash
+pyinstaller crisprzip_gui.py \
+  --name CRISPRzip \
+  --windowed \
+  --onedir \
+  --add-data "/path/to/your/venv/lib/python3.12/site-packages/nicegui:nicegui/static" \
+  --add-data "/path/to/your/venv/lib/python3.12/site-packages/latex2mathml:latex2mathml" \
+  --collect-all nicegui \
+  --collect-all crisprzip \
+  --collect-all matplotlib \
+  --collect-all numpy \
+  --collect-all pandas \
+  --hidden-import uvicorn.logging
+```
+- Important: Replace the paths with the correct ones for your system!
+
+</details>
+
+<details>
+  <summary>Linux</summary>
+
+  - **Instructions for Linux**
+
+</details>
+
+These commands will create a `dist` folder containing the executable and a `build` folder with the build files. Alternatively, you can run these commands from the `bin` folder, which contains scripts to build the executable for your platform. Remember to update the paths as needed.
 
 ## Contributing
 If you would like to contribute to this project: that's great! Have a look at our 
