@@ -40,19 +40,71 @@ targeting fidelity.* Nature Communications.
 
 ## Usage
 You can download the latest version of the CRISPRzip tool from the 
-[Releases page](https://github.com/hiddeoff/crisprizp-tool/releases).
-Download and launch!
+[Releases page](https://github.com/hiddeoff/crisprzip-tool/releases).
+Download and follow the user instructions below.
 
-### Available platforms
-| Platform      | File                                                                                                        |
-|---------------|-------------------------------------------------------------------------------------------------------------|
-| Windows       | [crisprzip.exe](https://github.com/hiddeoff/crisprizp-tool/releases/download/latest/crisprzip-tool-win.exe) |
-| macOS         | [crisrpzip](https://github.com/hiddeoff/crisprizp-tool/releases/download/latest/crisprzip-tool-macos)       |
-| Linux         | [crisrpzip](https://github.com/hiddeoff/crisprizp-tool/releases/download/latest/crisprzip-tool-unix)        |
+#### Available platforms
+| Platform and file |
+|---------------|
+| [CRISPRzip tool for Windows](https://github.com/hiddeoff/crisprzip-tool/releases/download/latest/crisprzip-tool-win) |
+| [CRISPRzip tool for macOS](https://github.com/hiddeoff/crisprzip-tool/releases/download/latest/crisprzip-tool-macos) |
+| [CRISPRzip tool for Linux](https://github.com/hiddeoff/crisprzip-tool/releases/download/latest/crisprzip-tool-unix)  |
+
+### User instructions
+
+<details>
+  <summary>Windows</summary>
+
+  - **Instructions for Windows**
+
+</details>
+
+<details>
+  <summary>macOS</summary>
+
+1. Download the macOS file an unzip it. You should see a file named `CRISPRzip.app`.
+
+*Note: The file extension may not be visible if your system is set to hide extensions.*
+
+2. Double-click on the `CRISPRzip.app` file. You will see a message like this:
+
+<img src="img/macos_screenshots/1.png" alt="macOS instructions image 1" width="300"/>
+
+This message is expected. Apple displays this warning for applications that are not distributed through the Mac App Store or not notarized by their developer program. Notarization requires an annual developer fee of 99 EUR. Rest assured, this does not indicate a problem with the application itself, but is a standard part of Apple’s security measures for software from outside the App Store.
+
+3. To proceed, open your "System Settings", go to "Privacy & Security", scroll down, and you will see this message:
+
+<img src="img/macos_screenshots/2.png" alt="macOS instructions image 2" width="700"/>
+
+click on "Open Anyway".
+
+4. You will be then prompted with this window when opening the CRISPRzip tool:
+
+<img src="img/macos_screenshots/3.png" alt="macOS instructions image 3" width="200"/>
+
+click on "Open Anyway".
+
+5. Enter your password.
+
+<img src="img/macos_screenshots/4.png" alt="macOS instructions image 4" width="200"/>
+
+6. CRISPRzip tool will now run as a standard app, and you will not need to repeat these steps for future launches.
+
+<img src="img/macos_screenshots/5.png" alt="macOS instructions image 5" width="700"/>
+<img src="img/macos_screenshots/6.png" alt="macOS instructions image 6" width="700"/>
+
+</details>
+
+<details>
+  <summary>Linux</summary>
+
+  - **Instructions for Linux**
+
+</details>
 
 ### Browser NiceGUI application
 As an alternative to the downloadable applications, you could clone this
-repository and launch CRISPRzip-tool from the terminal. It will open in your
+repository and launch CRISPRzip tool from the terminal. It will open in your
 browser. This way to launch the tool is sometimes (a lot) faster than the 
 executables. Follow the developer instructions below.
 
@@ -125,7 +177,7 @@ for their support to get this GUI released!
 
 ## Waiver
 Technische Universiteit Delft hereby disclaims all copyright interest in the
-program “CRISPRzip-tool” written by the Author(s).
+program “CRISPRzip tool” written by the Author(s).
 Paulien Herder, Dean of Applied Sciences
 
 (c) 2025, Hidde Offerhaus, Delft, The Netherlands.
