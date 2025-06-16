@@ -1,10 +1,10 @@
-from nicegui import ui
+from nicegui import native,ui
 import content.vitro_cleavage
 import content.vitro_binding
 
 # macOS packaging support
-from multiprocessing import freeze_support
-freeze_support()
+#from multiprocessing import freeze_support
+#freeze_support()
 
 
 @ui.page('/')
@@ -59,8 +59,8 @@ def index():
 
 ui.run(
     # Uncomment the next two lines if you want to build an executable, or to run in a contained window
-    #native=True,
-    #reload=False,
+    native=True,
+    reload=False,
     title='CRISPRzip tool',
     favicon="img/CRISPRzip_logo_v0_gradient_nobg.svg"
 )
