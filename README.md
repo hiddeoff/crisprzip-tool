@@ -55,7 +55,9 @@ Download and follow the user instructions below.
 <details>
   <summary>Windows</summary>
 
-  - **Instructions for Windows**
+1. Download the Windows file an unzip it. You should see a file named `CRISPRzip.exe`.
+2. Double-click on the `CRISPRzip.exe` file.
+3. You might see a warning that it is not from a trusted publisher. Allow it to run.
 
 </details>
 
@@ -98,7 +100,9 @@ click on "Open Anyway".
 <details>
   <summary>Linux</summary>
 
-  - **Instructions for Linux**
+1. Download the Linux file an unzip it. You should see a file named `CRISPRzip`.
+2. Double-click on the `CRISPRzip` file.
+3. You might see a warning that it is not from a trusted publisher. Allow it to run.
 
 </details>
 
