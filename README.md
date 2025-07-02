@@ -46,9 +46,9 @@ Download and follow the user instructions below.
 #### Available platforms
 | Platform and file |
 |---------------|
-| [CRISPRzip tool for Windows](https://github.com/hiddeoff/crisprzip-tool/releases/download/latest/crisprzip-tool-win) |
-| [CRISPRzip tool for macOS](https://github.com/hiddeoff/crisprzip-tool/releases/download/latest/crisprzip-tool-macos) |
-| [CRISPRzip tool for Linux](https://github.com/hiddeoff/crisprzip-tool/releases/download/latest/crisprzip-tool-unix)  |
+| [CRISPRzip tool for Windows](https://surfdrive.surf.nl/files/index.php/s/6RryClcq5BG8hMV) |
+| [CRISPRzip tool for macOS](https://surfdrive.surf.nl/files/index.php/s/hzAWS3RFbuZsKv7) |
+| [CRISPRzip tool for Linux](https://surfdrive.surf.nl/files/index.php/s/xuPNep7Xw0t34ga)  |
 
 ### User instructions
 
