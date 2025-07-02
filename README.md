@@ -46,16 +46,18 @@ Download and follow the user instructions below.
 #### Available platforms
 | Platform and file |
 |---------------|
-| [CRISPRzip tool for Windows](https://github.com/hiddeoff/crisprzip-tool/releases/download/latest/crisprzip-tool-win) |
-| [CRISPRzip tool for macOS](https://github.com/hiddeoff/crisprzip-tool/releases/download/latest/crisprzip-tool-macos) |
-| [CRISPRzip tool for Linux](https://github.com/hiddeoff/crisprzip-tool/releases/download/latest/crisprzip-tool-unix)  |
+| [CRISPRzip tool for Windows](https://surfdrive.surf.nl/files/index.php/s/6RryClcq5BG8hMV) |
+| [CRISPRzip tool for macOS](https://surfdrive.surf.nl/files/index.php/s/hzAWS3RFbuZsKv7) |
+| [CRISPRzip tool for Linux](https://surfdrive.surf.nl/files/index.php/s/xuPNep7Xw0t34ga)  |
 
 ### User instructions
 
 <details>
   <summary>Windows</summary>
 
-  - **Instructions for Windows**
+1. Download the Windows file an unzip it. You should see a file named `CRISPRzip.exe`.
+2. Double-click on the `CRISPRzip.exe` file.
+3. You might see a warning that it is not from a trusted publisher. Allow it to run.
 
 </details>
 
@@ -98,7 +100,9 @@ click on "Open Anyway".
 <details>
   <summary>Linux</summary>
 
-  - **Instructions for Linux**
+1. Download the Linux file an unzip it. You should see a file named `CRISPRzip`.
+2. Double-click on the `CRISPRzip` file.
+3. You might see a warning that it is not from a trusted publisher. Allow it to run.
 
 </details>
 
@@ -132,8 +136,21 @@ If you want to build the executable for the CRISPRzip tool, you can build it wit
 <details>
   <summary>Windows</summary>
 
-  - **Instructions for Windows**
-
+```bash
+pyinstaller crisprzip_gui.py ^
+    --name CRISPRzip ^
+    --onefile ^
+    --windowed ^
+    --add-data "%VENV_PATH%\Lib\site-packages\nicegui\static;nicegui/static" ^
+    --add-data "%VENV_PATH%\Lib\site-packages\latex2mathml\;latex2mathml" ^
+    --collect-all nicegui ^
+    --collect-all crisprzip ^
+    --collect-all matplotlib ^
+    --collect-all numpy ^
+    --collect-all pandas ^
+    --hidden-import uvicorn.logging
+```
+- Important: Set `%VENV_PATH%` with the appropriate path to your system!
 </details>
 
 <details>
@@ -160,7 +177,24 @@ pyinstaller crisprzip_gui.py \
 <details>
   <summary>Linux</summary>
 
-  - **Instructions for Linux**
+```bash
+pyinstaller crisprzip_gui.py \
+  --name CRISPRzip \
+  --windowed \
+  --onefile \
+  --add-data "$lib_path/site-packages/nicegui:nicegui/static" \
+  --add-data "$lib_path/site-packages/latex2mathml:latex2mathml" \
+  --collect-all nicegui \
+  --collect-all crisprzip \
+  --collect-all matplotlib \
+  --collect-all numpy \
+  --collect-all pandas \
+  --collect-all qtpy \
+  --hidden-import uvicorn.logging \
+  --hidden-import PySide6.QtWebEngineWidgets \
+  --exclude-module gi --exclude-module PyGObject --exclude-module gtk
+```
+- Important: Set the `lib_path` variable with the correct path to your system!
 
 </details>
 
