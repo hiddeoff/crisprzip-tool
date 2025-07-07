@@ -57,7 +57,15 @@ Download and follow the user instructions below.
 
 1. Download the Windows file an unzip it. You should see a file named `CRISPRzip.exe`.
 2. Double-click on the `CRISPRzip.exe` file.
-3. You might see a warning that it is not from a trusted publisher. Allow it to run.
+3. You might see a warning saying "Windows protected your PC". If so, click on "More info" indicated by the arrow in the image below:
+
+<img src="img/win_screenshots/CRISPRzip_win_screenshot0.png" alt="win instructions image 0" width="500"/>
+
+This message is expected. Windows displays this warning for applications that are not distributed through the Microsoft Store or not notarized by their developer program. Notarization requires an annual developer fee of 99 EUR. Rest assured, this does not indicate a problem with the application itself, but is a standard part of Microsoft security measures for software from outside the Microsoft Store.
+
+4. To proceed, click on "Run anyway" indicated by the arrow in the image below:
+
+<img src="img/win_screenshots/CRISPRzip_win_screenshot1.png" alt="win instructions image 1" width="500"/>
 
 </details>
 
