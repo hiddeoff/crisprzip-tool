@@ -61,7 +61,7 @@ Download and follow the user instructions below.
 
 <img src="img/win_screenshots/CRISPRzip_win_screenshot0.png" alt="win instructions image 0" width="500"/>
 
-This message is expected. Windows displays this warning for applications that are not distributed through the Microsoft Store or not notarized by their developer program. Notarization requires an annual developer fee of 99 EUR. Rest assured, this does not indicate a problem with the application itself, but is a standard part of Microsoft security measures for software from outside the Microsoft Store.
+This message is expected. Windows displays this warning for applications that are not distributed through the Microsoft Store or are not signed with a recognized code signing certificate. Obtaining such a certificate typically requires an annual fee paid to a certificate authority. This does not indicate a problem with the application itself, but is a standard part of Microsoft’s security measures for software from outside the Microsoft Store or unsigned applications.
 
 4. To proceed, click on "Run anyway" indicated by the arrow in the image below:
 
