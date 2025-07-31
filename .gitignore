@@ -1,9 +1,13 @@
 # Python
 content/__pycache__
 crisprzip_venv/
+cziptool_venv/
 
 # macOS
 .DS_Store
+
+# IntellIJ IDEA
+.idea/
 
 # Distribution related
 build/
