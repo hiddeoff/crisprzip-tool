@@ -1,5 +1,6 @@
 # CRISPRzip tool
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+![TUDelft DCC](https://img.shields.io/badge/tu_delft-DCC-black?style=flat&label=TU%20Delft&labelColor=%2300A6D6%20&color=%23000000&link=https%3A%2F%2Fdcc.tudelft.nl%2F) 
 
 Welcome to the codebase of the **CRISPRzip tool** from the [Depken Lab](https://depkenlab.tudelft.nl/) at TU
 Delft.
@@ -40,19 +41,83 @@ targeting fidelity.* Nature Communications.
 
 ## Usage
 You can download the latest version of the CRISPRzip tool from the 
-[Releases page](https://github.com/hiddeoff/crisprizp-tool/releases).
-Download and launch!
+[Releases page](https://github.com/hiddeoff/crisprzip-tool/releases).
+Download and follow the user instructions below.
 
-### Available platforms
-| Platform      | File                                                                                                        |
-|---------------|-------------------------------------------------------------------------------------------------------------|
-| Windows       | [crisprzip.exe](https://github.com/hiddeoff/crisprizp-tool/releases/download/latest/crisprzip-tool-win.exe) |
-| macOS         | [crisrpzip](https://github.com/hiddeoff/crisprizp-tool/releases/download/latest/crisprzip-tool-macos)       |
-| Linux         | [crisrpzip](https://github.com/hiddeoff/crisprizp-tool/releases/download/latest/crisprzip-tool-unix)        |
+#### Available platforms
+| Platform and file |
+|---------------|
+| [CRISPRzip tool for Windows](https://surfdrive.surf.nl/files/index.php/s/6RryClcq5BG8hMV) |
+| [CRISPRzip tool for macOS](https://surfdrive.surf.nl/files/index.php/s/hzAWS3RFbuZsKv7) |
+| [CRISPRzip tool for Linux](https://surfdrive.surf.nl/files/index.php/s/xuPNep7Xw0t34ga)  |
+
+### User instructions
+
+<details>
+  <summary>Windows</summary>
+
+1. Download the Windows file an unzip it. You should see a file named `CRISPRzip.exe`.
+2. Double-click on the `CRISPRzip.exe` file.
+3. You might see a warning saying "Windows protected your PC". If so, click on "More info" indicated by the arrow in the image below:
+
+<img src="img/win_screenshots/CRISPRzip_win_screenshot0.png" alt="win instructions image 0" width="500"/>
+
+This message is expected. Windows displays this warning for applications that are not distributed through the Microsoft Store or are not signed with a recognized code signing certificate. Obtaining such a certificate typically requires an annual fee paid to a certificate authority. This does not indicate a problem with the application itself, but is a standard part of Microsoft’s security measures for software from outside the Microsoft Store or unsigned applications.
+
+4. To proceed, click on "Run anyway" indicated by the arrow in the image below:
+
+<img src="img/win_screenshots/CRISPRzip_win_screenshot1.png" alt="win instructions image 1" width="500"/>
+
+</details>
+
+<details>
+  <summary>macOS</summary>
+
+1. Download the macOS file an unzip it. You should see a file named `CRISPRzip.app`.
+
+*Note: The file extension may not be visible if your system is set to hide extensions.*
+
+2. Double-click on the `CRISPRzip.app` file. You will see a message like this:
+
+<img src="img/macos_screenshots/1.png" alt="macOS instructions image 1" width="300"/>
+
+This message is expected. Apple displays this warning for applications that are not distributed through the Mac App Store or not notarized by their developer program. Notarization requires an annual developer fee of 99 EUR. Rest assured, this does not indicate a problem with the application itself, but is a standard part of Apple’s security measures for software from outside the App Store.
+
+3. To proceed, open your "System Settings", go to "Privacy & Security", scroll down, and you will see this message:
+
+<img src="img/macos_screenshots/2.png" alt="macOS instructions image 2" width="700"/>
+
+click on "Open Anyway".
+
+4. You will be then prompted with this window when opening the CRISPRzip tool:
+
+<img src="img/macos_screenshots/3.png" alt="macOS instructions image 3" width="200"/>
+
+click on "Open Anyway".
+
+5. Enter your password.
+
+<img src="img/macos_screenshots/4.png" alt="macOS instructions image 4" width="200"/>
+
+6. CRISPRzip tool will now run as a standard app, and you will not need to repeat these steps for future launches.
+
+<img src="img/macos_screenshots/5.png" alt="macOS instructions image 5" width="700"/>
+<img src="img/macos_screenshots/6.png" alt="macOS instructions image 6" width="700"/>
+
+</details>
+
+<details>
+  <summary>Linux</summary>
+
+1. Download the Linux file an unzip it. You should see a file named `CRISPRzip`.
+2. Double-click on the `CRISPRzip` file.
+3. You might see a warning that it is not from a trusted publisher. Allow it to run.
+
+</details>
 
 ### Browser NiceGUI application
 As an alternative to the downloadable applications, you could clone this
-repository and launch CRISPRzip-tool from the terminal. It will open in your
+repository and launch CRISPRzip tool from the terminal. It will open in your
 browser. This way to launch the tool is sometimes (a lot) faster than the 
 executables. Follow the developer instructions below.
 
@@ -80,8 +145,21 @@ If you want to build the executable for the CRISPRzip tool, you can build it wit
 <details>
   <summary>Windows</summary>
 
-  - **Instructions for Windows**
-
+```bash
+pyinstaller crisprzip_gui.py ^
+    --name CRISPRzip ^
+    --onefile ^
+    --windowed ^
+    --add-data "%VENV_PATH%\Lib\site-packages\nicegui\static;nicegui/static" ^
+    --add-data "%VENV_PATH%\Lib\site-packages\latex2mathml\;latex2mathml" ^
+    --collect-all nicegui ^
+    --collect-all crisprzip ^
+    --collect-all matplotlib ^
+    --collect-all numpy ^
+    --collect-all pandas ^
+    --hidden-import uvicorn.logging
+```
+- Important: Set `%VENV_PATH%` with the appropriate path to your system!
 </details>
 
 <details>
@@ -108,7 +186,24 @@ pyinstaller crisprzip_gui.py \
 <details>
   <summary>Linux</summary>
 
-  - **Instructions for Linux**
+```bash
+pyinstaller crisprzip_gui.py \
+  --name CRISPRzip \
+  --windowed \
+  --onefile \
+  --add-data "$lib_path/site-packages/nicegui:nicegui/static" \
+  --add-data "$lib_path/site-packages/latex2mathml:latex2mathml" \
+  --collect-all nicegui \
+  --collect-all crisprzip \
+  --collect-all matplotlib \
+  --collect-all numpy \
+  --collect-all pandas \
+  --collect-all qtpy \
+  --hidden-import uvicorn.logging \
+  --hidden-import PySide6.QtWebEngineWidgets \
+  --exclude-module gi --exclude-module PyGObject --exclude-module gtk
+```
+- Important: Set the `lib_path` variable with the correct path to your system!
 
 </details>
 
@@ -125,7 +220,7 @@ for their support to get this GUI released!
 
 ## Waiver
 Technische Universiteit Delft hereby disclaims all copyright interest in the
-program “CRISPRzip-tool” written by the Author(s).
+program “CRISPRzip tool” written by the Author(s).
 Paulien Herder, Dean of Applied Sciences
 
 (c) 2025, Hidde Offerhaus, Delft, The Netherlands.
