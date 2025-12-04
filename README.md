@@ -1,7 +1,7 @@
 # CRISPRzip tool
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-![TUDelft DCC](https://img.shields.io/badge/tu_delft-DCC-black?style=flat&label=TU%20Delft&labelColor=%2300A6D6%20&color=%23000000&link=https%3A%2F%2Fdcc.tudelft.nl%2F) 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17818523.svg)](https://doi.org/10.5281/zenodo.17818523)
+![TUDelft DCC](https://img.shields.io/badge/tu_delft-DCC-black?style=flat&label=TU%20Delft&labelColor=%2300A6D6%20&color=%23000000&link=https%3A%2F%2Fdcc.tudelft.nl%2F) 
 
 Welcome to the codebase of the **CRISPRzip tool** from the [Depken Lab](https://depkenlab.tudelft.nl/) at TU
 Delft.
