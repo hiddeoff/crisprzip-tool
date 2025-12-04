@@ -3,6 +3,11 @@ message: "If you are using this software, please cite it as shown below."
 authors:
 - family-names: "Offerhaus"
   given-names: "Hidde"
+type: software
 title: "CRISPRzip-tool"
+version: v1.0.0
+date-released: '2025-12-04'
 license: MIT
 url: "https://github.com/hiddeoff/crisprzip-tool"
+repository-code: https://github.com/hiddeoff/crisprzip-tool/tree/v1.0.0
+doi: 10.5281/zenodo.17818523
